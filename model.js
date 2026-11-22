@@ -97,9 +97,10 @@ function calcular(p) {
   }
 
   /* Hacienda */
-  r.importeObtenido = p.venta - p.pendiente;
+  r.importeObtenido = r.netoVenta; /* venta - hipoteca pendiente - gastos de venta (confirmar con gestor) */
   r.parteTuya = r.totalCompra * (p.titularidad / 100);
   r.titularidadMinima = r.totalCompra > 0 ? r.importeObtenido / r.totalCompra : 0;
+  r.ventaMaxCubierta = (r.parteTuya + p.pendiente + p.otrosVenta) / (1 - (p.honorariosVenta / 100) * iva);
   r.reinvierteTodo = r.parteTuya >= r.importeObtenido;
   r.sinReinvertir = Math.max(0, r.importeObtenido - r.parteTuya);
   r.plusvalia = p.venta - r.honorariosVenta - p.otrosVenta - p.valorAdquisicion;

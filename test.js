@@ -28,7 +28,7 @@ console.log('pmt 336k 2.75% 30a =', pmt(336000, 2.75, 30).toFixed(2), '(esp 1371
 console.log('IRPF 109k =', Math.round(irpfAhorro(109000)), '(esp ~24k)');
 const d = calcular(DEFAULTS);
 console.log('Defaults: M0', Math.round(d.hipotecaAlComprar), 'final', Math.round(d.hipotecaFinal), 'cuota puente', Math.round(d.cuotaMientrasVendeis), 'liquido final', Math.round(d.liquidoFinal));
-console.log('Defaults: importe obtenido', d.importeObtenido, 'parte tuya', Math.round(d.parteTuya), 'reinvierte', d.reinvierteTodo);
+console.log('Defaults: importe a reinvertir', Math.round(d.importeObtenido), 'venta max cubierta', Math.round(d.ventaMaxCubierta), 'parte tuya', Math.round(d.parteTuya), 'reinvierte', d.reinvierteTodo);
 const c350 = calcular(Object.assign({}, DEFAULTS, { precio: 350000 }));
 console.log('350k: reinvierte todo?', c350.reinvierteTodo, 'sin reinvertir', Math.round(c350.sinReinvertir));
 const cap = calcular(Object.assign({}, DEFAULTS, { precio: 420000, obras: 100000, obrasAntes: 100000 }));

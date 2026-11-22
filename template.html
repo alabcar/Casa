@@ -364,7 +364,7 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
       'Hipoteca nueva ' + eur(r.cuotaAlComprar) + ' más la actual ' + eur(P.cuotaActual) + ': ' + pct(r.ratioMientrasVendeis) + ' de ' + eur(P.ingresos) + ' (límite 35 %).'));
     A.push(alerta('ok', 'Cuota final: ' + eur(r.cuotaFinal) + '/mes', pct(r.ratioFinal) + ' de vuestros ingresos netos.'));
     if (r.reinvierteTodo) {
-      A.push(alerta('ok', 'Exención por reinversión cubierta', 'Tu parte de la compra (' + eur(r.parteTuya) + ') llega al importe obtenido del piso (' + eur(r.importeObtenido) + '). Titularidad mínima ' + pct(r.titularidadMinima) + '.'));
+      A.push(alerta('ok', 'Exención por reinversión cubierta', 'Tu parte de la compra (' + eur(r.parteTuya) + ') llega al importe a reinvertir del piso (' + eur(r.importeObtenido) + '). Titularidad mínima ' + pct(r.titularidadMinima) + '.'));
     } else {
       A.push(alerta('warn', 'No reinvertís todo el importe del piso', 'Tu parte (' + eur(r.parteTuya) + ') no llega a ' + eur(r.importeObtenido) + ': ' + eur(r.sinReinvertir) + ' sin reinvertir. Sube tu titularidad a ' + pct(r.titularidadMinima) + ' o más.'));
     }
@@ -409,7 +409,8 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
       row('Cuota final', eur(r.cuotaFinal) + '/mes') +
       '</dl>';
     D += '<p class="block-title">3. Hacienda (orientativo)</p><dl class="rows">' +
-      row('Importe obtenido (venta menos hipoteca actual)', eur(r.importeObtenido)) +
+      row('Importe a reinvertir (venta menos hipoteca y gastos de venta)', eur(r.importeObtenido)) +
+      row('Venta máxima cubierta con tu titularidad', eur(r.ventaMaxCubierta)) +
       row('Tu parte de la compra (' + P.titularidad + ' %)', eur(r.parteTuya)) +
       row('Plusvalía estimada del piso', eur(r.plusvalia)) +
       row('IRPF si no hubiera exención', eur(r.irpfSinExencion)) +
