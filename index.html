@@ -73,6 +73,10 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 .wrap { max-width: 640px; margin: 0 auto; padding: 0 16px 48px; }
+.layout { display: block; }
+.col-a, .col-b { display: contents; }
+#c-escenario { order: 1; } #c-avisos { order: 2; } #c-cuenta { order: 3; } #c-ajustes { order: 4; } #c-actions { order: 5; }
+.layout { display: flex; flex-direction: column; }
 h1 { font-size: 1.25rem; font-weight: 800; margin: 18px 0 2px; text-wrap: balance; }
 h2 { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
 .sub { margin: 0 0 14px; color: var(--muted); font-size: 0.88rem; }
@@ -85,6 +89,13 @@ h2 { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em; text-transform
   border-bottom: 1px solid var(--line);
   display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 8px;
 }
+.result .chips { grid-column: 1 / -1; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.result .chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; font-size: 0.74rem; font-weight: 700; border-radius: 999px; padding: 4px 10px; border: 1px solid; white-space: nowrap; }
+.chip.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.chip.warn { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
+.chip.bad { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+.chip.sum { color: var(--ink); }
 .tile { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
 .tile.main { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
 .tile .k { display: block; font-size: 0.68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
@@ -158,6 +169,16 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
 #fallback { display: none; width: 100%; margin-top: 8px; min-height: 150px; font: inherit; font-size: 0.82rem; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
 .foot { margin-top: 16px; font-size: 0.78rem; color: var(--muted); }
 
+@media (min-width: 920px) {
+  .wrap { max-width: 1160px; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 0 18px; align-items: start; }
+  .col-a, .col-b { display: block; }
+  #c-escenario, #c-avisos, #c-cuenta, #c-ajustes, #c-actions { order: 0; }
+  .result { grid-template-columns: repeat(3, 1fr); }
+  .result .chips { flex-wrap: wrap; overflow: visible; }
+  .tile strong { font-size: 1.15rem; }
+  .tile.main strong { font-size: 1.5rem; }
+}
 @media (max-width: 380px) {
   .result { gap: 6px; }
   .tile { padding: 7px 8px; }
@@ -176,34 +197,44 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
     <div class="tile main"><span class="k">Hipoteca final</span><strong id="r-final"></strong><span class="s" id="r-final-s"></span></div>
     <div class="tile"><span class="k">Al comprar</span><strong id="r-m0"></strong><span class="s" id="r-m0-s"></span></div>
     <div class="tile" id="tile-colchon"><span class="k">Colchón final</span><strong id="r-colchon"></strong><span class="s" id="r-colchon-s"></span></div>
+    <div class="chips" id="chips"></div>
   </div>
 
-  <section class="card">
+  <div class="layout">
+  <div class="col-a">
+
+  <section class="card" id="c-escenario">
     <h2>Escenario</h2>
     <div id="fields"></div>
   </section>
 
-  <section class="card">
-    <h2>Avisos</h2>
-    <div class="alerts" id="alerts"></div>
-  </section>
-
-  <section class="card">
-    <h2>La cuenta paso a paso</h2>
-    <div id="detalle"></div>
-  </section>
-
-  <details>
+  <details id="c-ajustes">
     <summary>Ajustes y supuestos</summary>
     <div class="adj" id="ajustes"></div>
   </details>
 
+  <div id="c-actions">
   <div class="actions">
     <button type="button" class="primary" id="copy">Copiar resumen</button>
     <button type="button" id="reset">Valores acordados</button>
     <span id="copy-note" role="status"></span>
   </div>
   <textarea id="fallback" readonly aria-label="Resumen para copiar"></textarea>
+  </div>
+  </div>
+
+  <div class="col-b">
+  <section class="card" id="c-avisos">
+    <h2>Avisos</h2>
+    <div class="alerts" id="alerts"></div>
+  </section>
+
+  <section class="card" id="c-cuenta">
+    <h2>La cuenta paso a paso</h2>
+    <div id="detalle"></div>
+  </section>
+  </div>
+  </div>
 
   <p class="foot">Cálculo orientativo con los supuestos de los ajustes (ITP, honorarios más IVA, tipo y plazo de la hipoteca). No sustituye la oferta de BBVA ni la opinión del gestor.</p>
 </div>
@@ -254,7 +285,7 @@ var DEFAULTS = {
   iva: 21,
   itp: 9,
   gastosCompra: 2800,
-  otrosVenta: 3000,
+  otrosVenta: 4100,
   pendiente: 56000,
   cuotaActual: 350,
   ahorrosTotales: 145000,
@@ -262,7 +293,12 @@ var DEFAULTS = {
   ingresos: 5833,
   titularidad: 75,
   valorAdquisicion: 250000,
-  ltv: 80
+  ltv: 80,
+  tasacion: 0,
+  amortPct: 100,
+  repartoHip: 50,
+  m2: 285,
+  mediana: 1394
 };
 
 function calcular(p) {
@@ -277,22 +313,30 @@ function calcular(p) {
   r.obrasDespues = p.obras - r.obrasAntes;
   r.pagarAhora = r.totalCompra + r.obrasAntes;
   r.disponible = p.ahorros + p.padres;
-  r.maxHipoteca = p.precio * (p.ltv / 100);
+  r.baseTasacion = p.tasacion > 0 ? Math.min(p.precio, p.tasacion) : p.precio;
+  r.maxHipoteca = r.baseTasacion * (p.ltv / 100);
   var falta = r.pagarAhora - r.disponible;
   r.hipotecaAlComprar = Math.max(0, Math.min(falta, r.maxHipoteca));
   r.faltaEntrada = Math.max(0, falta - r.maxHipoteca);
   r.sobraPrestamo = Math.max(0, -falta);
+  r.tasacionMinima = r.hipotecaAlComprar / (p.ltv / 100);
+  r.precioM2 = p.m2 > 0 ? p.precio / p.m2 : 0;
   r.liquidoTrasCompra = p.ahorrosTotales - p.ahorros - r.faltaEntrada + r.sobraPrestamo;
 
   /* Venta del piso */
   r.honorariosVenta = p.venta * (p.honorariosVenta / 100) * iva;
   r.netoVenta = p.venta - p.pendiente - r.honorariosVenta - p.otrosVenta;
   r.caja = r.netoVenta - p.padres - r.obrasDespues;
-  r.amortizacion = Math.max(0, Math.min(r.caja, r.hipotecaAlComprar));
+  r.amortizacion = Math.max(0, Math.min(r.caja, r.hipotecaAlComprar)) * (p.amortPct / 100);
   r.hipotecaFinal = r.hipotecaAlComprar - r.amortizacion;
   r.sobraTrasVender = Math.max(0, r.caja - r.hipotecaAlComprar);
   r.faltaTrasVender = Math.max(0, -r.caja);
   r.liquidoFinal = r.liquidoTrasCompra + (r.caja - r.amortizacion);
+
+  /* Aportaciones (hipoteca final repartida según repartoHip % de Julia) */
+  r.aportTu = (r.pagarAhora - r.hipotecaAlComprar) + r.obrasDespues + r.amortizacion;
+  r.aportTotal = r.totalCompra + p.obras;
+  r.aportTuPct = r.aportTotal > 0 ? (r.aportTu + r.hipotecaFinal * (1 - p.repartoHip / 100)) / r.aportTotal : 0;
 
   /* Cuotas */
   r.cuotaAlComprar = pmt(r.hipotecaAlComprar, p.tipo, p.plazo);
@@ -333,12 +377,13 @@ if (typeof module !== 'undefined') {
   var P = Object.assign({}, DEFAULTS);
 
   var FIELDS = [
-    { id: 'precio', label: 'Precio de compra (oferta)', min: 340000, max: 460000, step: 1000 },
+    { id: 'precio', label: 'Precio de compra (oferta)', min: 340000, max: 460000, step: 1000, dyn: true },
     { id: 'obras', label: 'Obras totales', min: 0, max: 150000, step: 5000 },
     { id: 'obrasAntes', label: 'Obras que se hacen antes de vender', min: 0, max: 150000, step: 5000, hint: 'Lo que pase del total de obras no cuenta.' },
-    { id: 'venta', label: 'Precio de venta del piso', min: 330000, max: 440000, step: 1000 },
+    { id: 'venta', label: 'Precio de venta del piso', min: 300000, max: 500000, step: 1000 },
     { id: 'ahorros', label: 'Ahorros que ponéis', min: 40000, max: 145000, step: 1000 },
-    { id: 'padres', label: 'Préstamo de tus padres', min: 0, max: 150000, step: 5000, hint: 'Se devuelve con el dinero del piso. No cambia la hipoteca final.' }
+    { id: 'padres', label: 'Préstamo de tus padres', min: 0, max: 150000, step: 5000, hint: 'Se devuelve con el dinero del piso. No cambia la hipoteca final.' },
+    { id: 'amortPct', label: 'Parte del dinero del piso que amortiza', min: 0, max: 100, step: 5, unit: '%', hint: '100 % = amortizas todo lo que sobre. 0 % = te lo quedas en efectivo.' }
   ];
 
   var ADJ = [
@@ -354,6 +399,7 @@ if (typeof module !== 'undefined') {
     { id: 'honorariosVenta', label: 'Honorarios venta (% + IVA)', type: 'dec' },
     { id: 'itp', label: 'ITP de la compra (%)', type: 'select', options: [['9', '9 %'], ['10', '10 %']] },
     { id: 'gastosCompra', label: 'Notaría, registro y tasación (€)', type: 'int' },
+    { id: 'tasacion', label: 'Tasación de la casa (€, 0 = igual al precio)', type: 'int' },
     { id: 'otrosVenta', label: 'Otros gastos de venta (€)', type: 'int' },
     { id: 'pendiente', label: 'Hipoteca actual pendiente (€)', type: 'int' },
     { id: 'cuotaActual', label: 'Cuota hipoteca actual (€/mes)', type: 'int' },
@@ -361,6 +407,9 @@ if (typeof module !== 'undefined') {
     { id: 'colchonMin', label: 'Colchón mínimo (€)', type: 'int' },
     { id: 'ingresos', label: 'Ingresos netos al mes (€)', type: 'int' },
     { id: 'titularidad', label: 'Tu titularidad (%)', type: 'int' },
+    { id: 'repartoHip', label: 'Hipoteca que asume Julia (%)', type: 'int' },
+    { id: 'm2', label: 'Metros construidos de la casa', type: 'int' },
+    { id: 'mediana', label: 'Mediana de la zona (€/m²)', type: 'int' },
     { id: 'valorAdquisicion', label: 'Valor de adquisición del piso (€)', type: 'int' }
   ];
 
@@ -389,9 +438,9 @@ if (typeof module !== 'undefined') {
     div.className = 'field';
     div.innerHTML =
       '<div class="field-top"><label for="n-' + f.id + '">' + f.label + '</label>' +
-      '<div class="num"><input id="n-' + f.id + '" type="text" inputmode="numeric" autocomplete="off"><span>€</span></div></div>' +
+      '<div class="num"><input id="n-' + f.id + '" type="text" inputmode="numeric" autocomplete="off"><span>' + (f.unit || '€') + '</span></div></div>' +
       '<input id="r-' + f.id + '" type="range" min="' + f.min + '" max="' + f.max + '" step="' + f.step + '" aria-label="' + f.label + '">' +
-      (f.hint ? '<p class="hint">' + f.hint + '</p>' : '');
+      (f.hint ? '<p class="hint">' + f.hint + '</p>' : '') + (f.dyn ? '<p class="hint" id="h-' + f.id + '"></p>' : '');
     fieldsEl.appendChild(div);
     var n = div.querySelector('#n-' + f.id);
     var r = div.querySelector('#r-' + f.id);
@@ -493,7 +542,45 @@ if (typeof module !== 'undefined') {
     } else {
       A.push(alerta('ok', 'Amortizar sin comisión', 'La amortización parcial de ' + eur(r.amortizacion) + ' no paga compensación.'));
     }
+    var dif = Math.abs(r.aportTuPct * 100 - P.titularidad);
+    A.push(alerta(dif > 5 ? 'warn' : 'ok', 'Aportaciones: tú ' + pct(r.aportTuPct) + ', Julia ' + pct(1 - r.aportTuPct),
+      'Con la hipoteca final repartida ' + (100 - P.repartoHip) + '/' + P.repartoHip + ', lo que pones tú es el ' + pct(r.aportTuPct) + ' del total. La escritura dice ' + P.titularidad + ' %.' + (dif > 5 ? ' Conviene un pacto de aportaciones o ajustar el porcentaje.' : '')));
     $('alerts').innerHTML = A.join('');
+
+    /* Chivatos fijos arriba */
+    var C = [];
+    function chip(e, txt) { C.push({ e: e, t: txt }); }
+    if (r.faltaEntrada > 0) chip('bad', 'Falta entrada ' + eur(r.faltaEntrada));
+    else if (r.sobraPrestamo > 0) chip('warn', 'Sobran ' + eur(r.sobraPrestamo) + ' de tus padres');
+    else chip('ok', 'Entrada');
+    if (P.precio > 0 && r.tasacionMinima / P.precio > 0.97) chip('warn', 'Tasación mínima ' + eur(r.tasacionMinima));
+    else chip('ok', 'Tasación');
+    if (colchon < P.colchonMin) chip('bad', 'Colchón bajo ' + eur(colchon));
+    else chip('ok', 'Colchón');
+    if (r.faltaTrasVender > 0) chip('bad', 'Piso no cubre: faltan ' + eur(r.faltaTrasVender));
+    else chip('ok', 'Piso cubre');
+    chip(r.ratioMientrasVendeis > 0.35 ? 'warn' : 'ok', 'Cuota puente ' + pct(r.ratioMientrasVendeis));
+    chip(r.ratioFinal > 0.35 ? 'warn' : 'ok', 'Cuota final ' + pct(r.ratioFinal));
+    chip(r.reinvierteTodo ? 'ok' : 'warn', r.reinvierteTodo ? 'Reinversión' : 'Reinversión: faltan ' + eur(r.sinReinvertir));
+    if (P.honorariosCompra > 2) chip('warn', 'Honorarios compra > 2 %');
+    if (r.comisionTope > 0) chip('warn', 'Comisión amortizar ≤ ' + eur(r.comisionTope));
+    if (dif > 5) chip('warn', 'Reparto ' + pct(r.aportTuPct) + ' vs escritura ' + P.titularidad + ' %');
+    if (P.mediana > 0) {
+      var sobre = r.precioM2 / P.mediana - 1;
+      chip(sobre > 0.1 ? 'warn' : 'ok', eur(r.precioM2) + '/m²' + (sobre > 0.1 ? ' (+' + pct(sobre) + ' zona)' : ''));
+    }
+    var orden = { bad: 0, warn: 1, ok: 2 };
+    C.sort(function (a, b) { return orden[a.e] - orden[b.e]; });
+    var nb = C.filter(function (c) { return c.e === 'bad'; }).length;
+    var nw = C.filter(function (c) { return c.e === 'warn'; }).length;
+    var sum = nb ? '<span class="chip bad sum">' + nb + (nb === 1 ? ' problema' : ' problemas') + '</span>'
+      : nw ? '<span class="chip warn sum">' + nw + (nw === 1 ? ' aviso' : ' avisos') + '</span>'
+      : '<span class="chip ok sum">Todo en orden</span>';
+    $('chips').innerHTML = sum + C.map(function (c) { return '<span class="chip ' + c.e + '">' + c.t + '</span>'; }).join('');
+    if ($('h-precio')) {
+      var d = P.mediana > 0 ? r.precioM2 / P.mediana - 1 : 0;
+      $('h-precio').textContent = eur(r.precioM2) + '/m² · mediana de la zona ≈ ' + eur(P.mediana) + '/m² (' + (d >= 0 ? '+' : '') + pct(d) + ')';
+    }
 
     /* Cuenta paso a paso */
     function row(k, v, cls) { return '<div' + (cls ? ' class="' + cls + '"' : '') + '><dt>' + k + '</dt><dd>' + v + '</dd></div>'; }
@@ -512,6 +599,7 @@ if (typeof module !== 'undefined') {
       row('Préstamo de tus padres', eur(P.padres)) +
       row('Hipoteca', eur(r.hipotecaAlComprar), 'tot') +
       (r.faltaEntrada > 0 ? row('Del colchón (falta)', eur(r.faltaEntrada)) : '') +
+      row('Tasación mínima para esta hipoteca', eur(r.tasacionMinima)) +
       '</dl>';
     D += '<p class="block-title">2. Al vender el piso</p><dl class="rows">' +
       row('Venta', eur(P.venta)) +
@@ -523,6 +611,7 @@ if (typeof module !== 'undefined') {
       row('Obras pendientes', '-' + eur(r.obrasDespues)) +
       row('Disponible para amortizar', eur(r.caja), 'tot') +
       row('Amortización de la hipoteca', eur(r.amortizacion)) +
+      row('Efectivo del piso que te quedas', eur(Math.max(0, r.caja - r.amortizacion))) +
       row('Hipoteca final', eur(r.hipotecaFinal), 'tot') +
       row('Cuota final', eur(r.cuotaFinal) + '/mes') +
       '</dl>';
@@ -532,6 +621,14 @@ if (typeof module !== 'undefined') {
       row('Tu parte de la compra (' + P.titularidad + ' %)', eur(r.parteTuya)) +
       row('Plusvalía estimada del piso', eur(r.plusvalia)) +
       row('IRPF si no hubiera exención', eur(r.irpfSinExencion)) +
+      '</dl>';
+    D += '<p class="block-title">4. Aportaciones (para el reparto)</p><dl class="rows">' +
+      row('Pones tú: efectivo, obras y amortización', eur(r.aportTu)) +
+      row('Tu parte de la hipoteca final (' + (100 - P.repartoHip) + ' %)', eur(r.hipotecaFinal * (1 - P.repartoHip / 100))) +
+      row('Parte de Julia en la hipoteca final (' + P.repartoHip + ' %)', eur(r.hipotecaFinal * P.repartoHip / 100)) +
+      row('Total de la compra y las obras', eur(r.aportTotal)) +
+      row('Tu aportación', pct(r.aportTuPct, 1), 'tot') +
+      row('Titularidad en la escritura', P.titularidad + ' %') +
       '</dl>';
     $('detalle').innerHTML = D;
   }
@@ -547,6 +644,8 @@ if (typeof module !== 'undefined') {
     t.push('Al vender: devolver ' + eur(P.padres) + ' a los padres y amortizar ' + eur(r.amortizacion));
     t.push('Hipoteca final: ' + eur(r.hipotecaFinal) + ', cuota ' + eur(r.cuotaFinal) + '/mes');
     t.push('Colchón final: ' + eur(r.liquidoFinal));
+    t.push('Efectivo del piso que te quedas: ' + eur(Math.max(0, r.caja - r.amortizacion)) + ' · Tasación mínima ' + eur(r.tasacionMinima));
+    t.push('Aportaciones: tú ' + pct(r.aportTuPct, 1) + ', Julia ' + pct(1 - r.aportTuPct, 1) + ' (escritura ' + P.titularidad + ' %)');
     t.push('Honorarios totales con IVA: ' + eur(r.honorariosTotales));
     t.push('Reinversión: ' + (r.reinvierteTodo ? 'cubierta' : 'faltan ' + eur(r.sinReinvertir)));
     return t.join('\n');

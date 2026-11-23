@@ -43,7 +43,7 @@ var DEFAULTS = {
   iva: 21,
   itp: 9,
   gastosCompra: 2800,
-  otrosVenta: 3000,
+  otrosVenta: 4100,
   pendiente: 56000,
   cuotaActual: 350,
   ahorrosTotales: 145000,
@@ -51,7 +51,12 @@ var DEFAULTS = {
   ingresos: 5833,
   titularidad: 75,
   valorAdquisicion: 250000,
-  ltv: 80
+  ltv: 80,
+  tasacion: 0,
+  amortPct: 100,
+  repartoHip: 50,
+  m2: 285,
+  mediana: 1394
 };
 
 function calcular(p) {
@@ -66,22 +71,30 @@ function calcular(p) {
   r.obrasDespues = p.obras - r.obrasAntes;
   r.pagarAhora = r.totalCompra + r.obrasAntes;
   r.disponible = p.ahorros + p.padres;
-  r.maxHipoteca = p.precio * (p.ltv / 100);
+  r.baseTasacion = p.tasacion > 0 ? Math.min(p.precio, p.tasacion) : p.precio;
+  r.maxHipoteca = r.baseTasacion * (p.ltv / 100);
   var falta = r.pagarAhora - r.disponible;
   r.hipotecaAlComprar = Math.max(0, Math.min(falta, r.maxHipoteca));
   r.faltaEntrada = Math.max(0, falta - r.maxHipoteca);
   r.sobraPrestamo = Math.max(0, -falta);
+  r.tasacionMinima = r.hipotecaAlComprar / (p.ltv / 100);
+  r.precioM2 = p.m2 > 0 ? p.precio / p.m2 : 0;
   r.liquidoTrasCompra = p.ahorrosTotales - p.ahorros - r.faltaEntrada + r.sobraPrestamo;
 
   /* Venta del piso */
   r.honorariosVenta = p.venta * (p.honorariosVenta / 100) * iva;
   r.netoVenta = p.venta - p.pendiente - r.honorariosVenta - p.otrosVenta;
   r.caja = r.netoVenta - p.padres - r.obrasDespues;
-  r.amortizacion = Math.max(0, Math.min(r.caja, r.hipotecaAlComprar));
+  r.amortizacion = Math.max(0, Math.min(r.caja, r.hipotecaAlComprar)) * (p.amortPct / 100);
   r.hipotecaFinal = r.hipotecaAlComprar - r.amortizacion;
   r.sobraTrasVender = Math.max(0, r.caja - r.hipotecaAlComprar);
   r.faltaTrasVender = Math.max(0, -r.caja);
   r.liquidoFinal = r.liquidoTrasCompra + (r.caja - r.amortizacion);
+
+  /* Aportaciones (hipoteca final repartida según repartoHip % de Julia) */
+  r.aportTu = (r.pagarAhora - r.hipotecaAlComprar) + r.obrasDespues + r.amortizacion;
+  r.aportTotal = r.totalCompra + p.obras;
+  r.aportTuPct = r.aportTotal > 0 ? (r.aportTu + r.hipotecaFinal * (1 - p.repartoHip / 100)) / r.aportTotal : 0;
 
   /* Cuotas */
   r.cuotaAlComprar = pmt(r.hipotecaAlComprar, p.tipo, p.plazo);
