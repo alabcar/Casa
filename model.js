@@ -54,6 +54,7 @@ var DEFAULTS = {
   ltv: 80,
   tasacion: 0,
   amortPct: 100,
+  colchonObjetivo: null,
   repartoHip: 50,
   m2: 285,
   mediana: 1394
@@ -85,7 +86,15 @@ function calcular(p) {
   r.honorariosVenta = p.venta * (p.honorariosVenta / 100) * iva;
   r.netoVenta = p.venta - p.pendiente - r.honorariosVenta - p.otrosVenta;
   r.caja = r.netoVenta - p.padres - r.obrasDespues;
-  r.amortizacion = Math.max(0, Math.min(r.caja, r.hipotecaAlComprar)) * (p.amortPct / 100);
+  var maxAmort = Math.max(0, Math.min(r.caja, r.hipotecaAlComprar));
+  r.liquidoSinAmortizar = r.liquidoTrasCompra + r.caja; /* efectivo máximo que puedes quedarte */
+  r.colchonMinimoPosible = r.liquidoSinAmortizar - maxAmort; /* efectivo si amortizas todo lo posible */
+  var objetivo = (p.colchonObjetivo !== null && p.colchonObjetivo !== undefined && p.colchonObjetivo >= 0) ? p.colchonObjetivo : null;
+  r.amortizacion = objetivo !== null
+    ? Math.max(0, Math.min(maxAmort, r.liquidoSinAmortizar - objetivo))
+    : maxAmort * (p.amortPct / 100);
+  r.amortPctEf = maxAmort > 0 ? (r.amortizacion / maxAmort) * 100 : 0;
+  r.colchonObjetivoAlcanzable = objetivo === null || (objetivo >= r.colchonMinimoPosible - 1 && objetivo <= r.liquidoSinAmortizar + 1);
   r.hipotecaFinal = r.hipotecaAlComprar - r.amortizacion;
   r.sobraTrasVender = Math.max(0, r.caja - r.hipotecaAlComprar);
   r.faltaTrasVender = Math.max(0, -r.caja);

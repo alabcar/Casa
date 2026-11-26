@@ -252,7 +252,8 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
     { id: 'venta', label: 'Precio de venta del piso', min: 300000, max: 500000, step: 1000 },
     { id: 'ahorros', label: 'Ahorros que ponéis', min: 40000, max: 145000, step: 1000 },
     { id: 'padres', label: 'Préstamo de tus padres', min: 0, max: 150000, step: 5000, hint: 'Se devuelve con el dinero del piso. No cambia la hipoteca final.' },
-    { id: 'amortPct', label: 'Parte del dinero del piso que amortiza', min: 0, max: 100, step: 5, unit: '%', hint: '100 % = amortizas todo lo que sobre. 0 % = te lo quedas en efectivo.' }
+    { id: 'amortPct', label: 'Parte del dinero del piso que amortiza', min: 0, max: 100, step: 5, unit: '%', hint: '100 % = amortizas todo lo que sobre. 0 % = te lo quedas en efectivo.' },
+    { id: 'colchonObjetivo', label: 'Efectivo que quiero tener tras vender', min: 0, max: 400000, step: 5000, hint: 'Mueve esto y la calculadora ajusta lo que amortizas. Incluye lo que ya te queda tras la compra.' }
   ];
 
   var ADJ = [
@@ -313,9 +314,10 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
     fieldsEl.appendChild(div);
     var n = div.querySelector('#n-' + f.id);
     var r = div.querySelector('#r-' + f.id);
-    r.addEventListener('input', function () { P[f.id] = parseInt(r.value, 10); n.value = num(P[f.id]); update(); });
-    n.addEventListener('input', function () { P[f.id] = parse(n.value); r.value = P[f.id]; update(); });
-    n.addEventListener('blur', function () { n.value = num(P[f.id]); });
+    function tocado() { if (f.id === 'amortPct') { P.colchonObjetivo = null; } }
+    r.addEventListener('input', function () { P[f.id] = parseInt(r.value, 10); tocado(); n.value = num(P[f.id]); update(); });
+    n.addEventListener('input', function () { P[f.id] = parse(n.value); tocado(); r.value = P[f.id]; update(); });
+    n.addEventListener('blur', function () { n.value = num(P[f.id] === null ? 0 : P[f.id]); update(); });
   });
 
   /* Ajustes */
@@ -348,6 +350,7 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
 
   function syncInputs() {
     FIELDS.forEach(function (f) {
+      if (P[f.id] === null) { return; }
       $('n-' + f.id).value = num(P[f.id]);
       $('r-' + f.id).value = P[f.id];
     });
@@ -373,6 +376,15 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
     $('r-final-s').textContent = eur(r.cuotaFinal) + ' al mes';
     $('r-m0').textContent = eur(r.hipotecaAlComprar);
     $('r-m0-s').textContent = eur(r.cuotaMientrasVendeis) + '/mes con la actual';
+    /* Los dos controles de amortización van enlazados: el que no tocas muestra el valor resultante */
+    var enfocado = document.activeElement && document.activeElement.id;
+    if (P.colchonObjetivo === null) {
+      if (enfocado !== 'n-colchonObjetivo') { $('n-colchonObjetivo').value = num(r.liquidoFinal); }
+      $('r-colchonObjetivo').value = Math.round(r.liquidoFinal);
+    } else {
+      if (enfocado !== 'n-amortPct') { $('n-amortPct').value = num(r.amortPctEf); }
+      $('r-amortPct').value = Math.round(r.amortPctEf);
+    }
     var colchon = Math.min(r.liquidoTrasCompra, r.liquidoFinal);
     $('r-colchon').textContent = eur(r.liquidoFinal);
     $('r-colchon-s').textContent = 'mínimo ' + eur(P.colchonMin);
@@ -391,6 +403,9 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
       A.push(alerta('bad', 'El colchón baja de lo previsto', 'Quedaría en ' + eur(Math.min(r.liquidoTrasCompra, r.liquidoFinal)) + ' y el mínimo es ' + eur(P.colchonMin) + '.'));
     } else {
       A.push(alerta('ok', 'Colchón protegido', 'Queda ' + eur(Math.min(r.liquidoTrasCompra, r.liquidoFinal)) + ' (mínimo ' + eur(P.colchonMin) + ').'));
+    }
+    if (!r.colchonObjetivoAlcanzable) {
+      A.push(alerta('warn', 'No se puede llegar a ese colchón', 'Con esta venta y estas obras el efectivo final va de ' + eur(r.colchonMinimoPosible) + ' (amortizando todo lo posible) a ' + eur(r.liquidoSinAmortizar) + ' (sin amortizar).'));
     }
     if (r.faltaTrasVender > 0) {
       A.push(alerta('bad', 'El piso no cubre todo al venderlo', 'Faltarían ' + eur(r.faltaTrasVender) + ' para devolver a tus padres y pagar las obras pendientes.'));
@@ -512,7 +527,7 @@ button.primary { background: var(--accent); color: var(--accent-ink); border-col
     t.push('Al comprar: hipoteca ' + eur(r.hipotecaAlComprar) + ', cuota ' + eur(r.cuotaAlComprar) + ' (' + eur(r.cuotaMientrasVendeis) + ' con la actual)');
     t.push('Al vender: devolver ' + eur(P.padres) + ' a los padres y amortizar ' + eur(r.amortizacion));
     t.push('Hipoteca final: ' + eur(r.hipotecaFinal) + ', cuota ' + eur(r.cuotaFinal) + '/mes');
-    t.push('Colchón final: ' + eur(r.liquidoFinal));
+    t.push('Colchón final: ' + eur(r.liquidoFinal) + ' (máximo posible sin amortizar: ' + eur(r.liquidoSinAmortizar) + ')');
     t.push('Efectivo del piso que te quedas: ' + eur(Math.max(0, r.caja - r.amortizacion)) + ' · Tasación mínima ' + eur(r.tasacionMinima));
     t.push('Aportaciones: tú ' + pct(r.aportTuPct, 1) + ', Julia ' + pct(1 - r.aportTuPct, 1) + ' (escritura ' + P.titularidad + ' %)');
     t.push('Honorarios totales con IVA: ' + eur(r.honorariosTotales));

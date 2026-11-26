@@ -44,5 +44,13 @@ ex(n2.liquidoFinal, 230322, 5, 'Líquido sin amortizar (otros 4100):');
 const n3 = calcular(Object.assign({}, DEFAULTS, { precio: 440000, tasacion: 420000 }));
 ex(n3.maxHipoteca, 336000, 1, 'Máximo con tasación 420k:');
 ex(calcular(Object.assign({}, DEFAULTS, { venta: 500000 })).netoVenta, 500000 - 56000 - 500000 * 0.025 * 1.21 - 4100, 1, 'Venta 500k neto:');
+const c0 = calcular(Object.assign({}, DEFAULTS, { precio: 400000, obras: 75000, venta: 400000, titularidad: 80, amortPct: 0 }));
+ex(c0.liquidoSinAmortizar, 227800, 5, 'Efectivo máximo sin amortizar (400k/400k, obras 75k):');
+const c1 = calcular(Object.assign({}, DEFAULTS, { precio: 400000, obras: 75000, venta: 400000, titularidad: 80, colchonObjetivo: 100000 }));
+ex(c1.liquidoFinal, 100000, 5, 'Colchón objetivo 100.000:');
+ex(c1.amortizacion, 127800, 5, 'Amortización para ese colchón:');
+const c2 = calcular(Object.assign({}, DEFAULTS, { precio: 400000, obras: 75000, venta: 400000, titularidad: 80, colchonObjetivo: 300000 }));
+ex(c2.liquidoFinal, 227800, 5, 'Colchón inalcanzable queda en el máximo:');
+if (c2.colchonObjetivoAlcanzable) { ok = false; console.log('FALLA alcanzable'); }
 console.log(ok ? 'TODO OK' : 'HAY FALLOS');
 process.exit(ok ? 0 : 1);
