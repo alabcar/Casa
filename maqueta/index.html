@@ -1034,7 +1034,7 @@ canvas.addEventListener("pointermove",e=>{
   if(!drag) return;
   const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
   if(cam.mode==="orbit"){ cam.yaw-=dx*0.006; cam.pitch=Math.max(0.05,Math.min(1.5,cam.pitch+dy*0.006)); }
-  else { cam.yaw+=dx*0.004; cam.pitch=Math.max(-1.2,Math.min(1.2,cam.pitch-dy*0.004)); }
+  else { const k=0.0035*cam.fov/1.31; cam.yaw-=dx*k; cam.pitch=Math.max(-1.2,Math.min(1.2,cam.pitch+dy*k)); }   // como Street View: se arrastra la imagen
   draw();
 });
 canvas.addEventListener("wheel",e=>{ e.preventDefault(); zoomBy(1+e.deltaY*(cam.mode==="orbit"?0.001:0.0008)); },{passive:false});
@@ -1209,8 +1209,8 @@ function move(dx,dz){
 /* selector de modo */
 const coarse=window.matchMedia("(pointer:coarse)").matches;
 const HINT={vista:"Arrastra para girar · rueda o pellizca para acercar",
-  puntos:"Toca un círculo para ir · arrastra para mirar",
-  libre:coarse?"Joystick para andar · arrastra para mirar":"W A S D o flechas para andar · Q/E o arrastrar para girar · Mayús para correr"};
+  puntos:"Toca un círculo para ir · arrastra la imagen para mirar",
+  libre:coarse?"Joystick para andar · arrastra la imagen para mirar":"W A S D o flechas para andar · Q/E o arrastrar la imagen para girar · Mayús para correr"};
 function navUI(){
   document.querySelectorAll("#navs .chip").forEach(b=>b.classList.toggle("on",b.dataset.n===state.nav));
   document.getElementById("gotoRow").style.display=state.nav==="vista"?"none":"";
