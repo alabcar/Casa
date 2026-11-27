@@ -3,709 +3,92 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Calculadora casa Foios</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
-<style>
-/* Idea de diseño: hoja de cálculo de notaría, sobria. Resultado fijo arriba, controles debajo, cuenta al final. */
-:root {
-  --bg: #eef1f6;
-  --card: #ffffff;
-  --ink: #101828;
-  --muted: #566176;
-  --line: #d8dee8;
-  --accent: #0f766e;
-  --accent-ink: #ffffff;
-  --ok: #17794a;
-  --warn: #a35b00;
-  --bad: #b42318;
-  --ok-bg: #e6f4ec;
-  --warn-bg: #fdf1dd;
-  --bad-bg: #fde8e6;
-  --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0d121a;
-    --card: #161d28;
-    --ink: #e8edf5;
-    --muted: #93a0b5;
-    --line: #263041;
-    --accent: #2dd4bf;
-    --accent-ink: #06201d;
-    --ok: #5fd39a;
-    --warn: #f0b35a;
-    --bad: #ff8d84;
-    --ok-bg: #12301f;
-    --warn-bg: #352610;
-    --bad-bg: #3a1815;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0d121a;
-  --card: #161d28;
-  --ink: #e8edf5;
-  --muted: #93a0b5;
-  --line: #263041;
-  --accent: #2dd4bf;
-  --accent-ink: #06201d;
-  --ok: #5fd39a;
-  --warn: #f0b35a;
-  --bad: #ff8d84;
-  --ok-bg: #12301f;
-  --warn-bg: #352610;
-  --bad-bg: #3a1815;
-  color-scheme: dark;
-}
-
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font);
-  font-size: 15px;
-  line-height: 1.45;
-  font-variant-numeric: tabular-nums;
-  -webkit-text-size-adjust: 100%;
-}
-.wrap { max-width: 640px; margin: 0 auto; padding: 0 16px 48px; }
-.layout { display: block; }
-.col-a, .col-b { display: contents; }
-#c-escenario { order: 1; } #c-avisos { order: 2; } #c-cuenta { order: 3; } #c-ajustes { order: 4; } #c-actions { order: 5; }
-.layout { display: flex; flex-direction: column; }
-h1 { font-size: 1.25rem; font-weight: 800; margin: 18px 0 2px; text-wrap: balance; }
-h2 { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
-.sub { margin: 0 0 14px; color: var(--muted); font-size: 0.88rem; }
-
-/* Resultado fijo */
-.result {
-  position: sticky; top: 0; z-index: 5;
-  background: var(--bg);
-  padding: 8px 0 10px;
-  border-bottom: 1px solid var(--line);
-  display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 8px;
-}
-.result .chips { grid-column: 1 / -1; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-.result .chips::-webkit-scrollbar { display: none; }
-.chip { flex: none; font-size: 0.74rem; font-weight: 700; border-radius: 999px; padding: 4px 10px; border: 1px solid; white-space: nowrap; }
-.chip.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
-.chip.warn { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
-.chip.bad { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
-.chip.sum { color: var(--ink); }
-.tile { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
-.tile.main { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
-.tile .k { display: block; font-size: 0.68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.tile strong { display: block; font-size: 1.02rem; font-weight: 800; line-height: 1.2; margin-top: 2px; white-space: nowrap; }
-.tile .s { display: block; font-size: 0.74rem; color: var(--muted); margin-top: 1px; }
-.tile.main strong { font-size: 1.3rem; }
-.tile.low strong { color: var(--bad); }
-
-section.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-top: 14px; }
-
-/* Controles */
-.field { padding: 10px 0; border-top: 1px solid var(--line); }
-.field:first-of-type { border-top: 0; padding-top: 0; }
-.field-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
-.field label { font-weight: 600; font-size: 0.9rem; }
-.num { display: flex; align-items: center; gap: 4px; flex: none; }
-.num input {
-  width: 112px; text-align: right; font: inherit; font-weight: 600; color: var(--ink);
-  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px;
-}
-.num span { color: var(--muted); font-size: 0.85rem; }
-input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; height: 28px; }
-.hint { font-size: 0.78rem; color: var(--muted); margin: 2px 0 0; }
-input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible {
-  outline: 2px solid var(--accent); outline-offset: 2px;
-}
-
-/* Avisos */
-.alerts { display: grid; gap: 8px; }
-.alert { border-radius: 10px; padding: 9px 11px; border-left: 4px solid; }
-.alert b { display: block; font-size: 0.88rem; }
-.alert span { font-size: 0.84rem; }
-.alert.ok { background: var(--ok-bg); border-color: var(--ok); }
-.alert.ok b { color: var(--ok); }
-.alert.warn { background: var(--warn-bg); border-color: var(--warn); }
-.alert.warn b { color: var(--warn); }
-.alert.bad { background: var(--bad-bg); border-color: var(--bad); }
-.alert.bad b { color: var(--bad); }
-
-/* Cuenta */
-dl.rows { margin: 0; display: grid; }
-dl.rows > div { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid var(--line); }
-dl.rows > div:first-child { border-top: 0; }
-dl.rows dt { color: var(--muted); font-size: 0.88rem; }
-dl.rows dd { margin: 0; font-weight: 600; text-align: right; white-space: nowrap; }
-dl.rows .tot dt { color: var(--ink); font-weight: 600; }
-dl.rows .tot dd { font-weight: 800; }
-.block-title { font-weight: 800; font-size: 0.9rem; margin: 14px 0 4px; }
-.block-title:first-child { margin-top: 0; }
-
-/* Ajustes */
-details { margin-top: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; }
-summary { cursor: pointer; padding: 13px 0; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-details[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 8px; }
-.adj { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; padding: 4px 0 14px; }
-.adj .a { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.adj label { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
-.adj input, .adj select {
-  width: 100%; font: inherit; color: var(--ink); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 8px; padding: 7px 8px;
-}
-.adj .wide { grid-column: 1 / -1; }
-
-.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-button {
-  font: inherit; font-weight: 600; border-radius: 10px; padding: 10px 14px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--card); color: var(--ink);
-}
-button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-#copy-note { align-self: center; font-size: 0.84rem; color: var(--muted); }
-#fallback { display: none; width: 100%; margin-top: 8px; min-height: 150px; font: inherit; font-size: 0.82rem; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
-.foot { margin-top: 16px; font-size: 0.78rem; color: var(--muted); }
-
-@media (min-width: 920px) {
-  .wrap { max-width: 1160px; }
-  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 0 18px; align-items: start; }
-  .col-a, .col-b { display: block; }
-  #c-escenario, #c-avisos, #c-cuenta, #c-ajustes, #c-actions { order: 0; }
-  .result { grid-template-columns: repeat(3, 1fr); }
-  .result .chips { flex-wrap: wrap; overflow: visible; }
-  .tile strong { font-size: 1.15rem; }
-  .tile.main strong { font-size: 1.5rem; }
-}
-@media (max-width: 380px) {
-  .result { gap: 6px; }
-  .tile { padding: 7px 8px; }
-  .tile strong { font-size: 0.9rem; }
-  .tile.main strong { font-size: 1.05rem; }
-  .num input { width: 96px; }
-}
-</style>
+<meta name="robots" content="noindex,nofollow">
+<title>Casa de Foios · proyecto de reforma</title>
+<link rel="stylesheet" href="assets.css">
 </head>
 <body>
-<div class="wrap">
-  <h1>Calculadora casa Foios</h1>
-  <p class="sub">Compra de la casa, obras y venta del piso de Buen Orden. Mueve los deslizadores y mira cómo queda la hipoteca.</p>
+<header class="top"><nav>
+  <b>Casa de Foios</b>
+  <a href="#casa">La casa</a><a href="#reglas">Criterios</a><a href="#salon">Salón</a><a href="#bano">Baño</a>
+  <a href="#envolvente">Envolvente</a><a href="#cambra">Cambra</a><a href="#pendiente">Pendiente</a>
+  <a href="maqueta/">Maqueta 3D</a><a href="presupuesto/">Presupuesto</a><a href="calculadora/">Calculadora</a>
+</nav></header>
 
-  <div class="result" aria-live="polite">
-    <div class="tile main"><span class="k">Hipoteca final</span><strong id="r-final"></strong><span class="s" id="r-final-s"></span></div>
-    <div class="tile"><span class="k">Al comprar</span><strong id="r-m0"></strong><span class="s" id="r-m0-s"></span></div>
-    <div class="tile" id="tile-colchon"><span class="k">Colchón final</span><strong id="r-colchon"></strong><span class="s" id="r-colchon-s"></span></div>
-    <div class="chips" id="chips"></div>
-  </div>
+<main>
+<h1>Casa tradicional de Foios</h1>
+<p class="lead">Proyecto de reforma básica de una casa valenciana de hacia 1900 (calle Jutera): conservar lo que tiene carácter, ampliar el salón hacia el patio y resolver humedades, cubierta y carpinterías.</p>
 
-  <div class="layout">
-  <div class="col-a">
-
-  <section class="card" id="c-escenario">
-    <h2>Escenario</h2>
-    <div id="fields"></div>
-  </section>
-
-  <details id="c-ajustes">
-    <summary>Ajustes y supuestos</summary>
-    <div class="adj" id="ajustes"></div>
-  </details>
-
-  <div id="c-actions">
-  <div class="actions">
-    <button type="button" class="primary" id="copy">Copiar resumen</button>
-    <button type="button" id="reset">Valores acordados</button>
-    <span id="copy-note" role="status"></span>
-  </div>
-  <textarea id="fallback" readonly aria-label="Resumen para copiar"></textarea>
-  </div>
-  </div>
-
-  <div class="col-b">
-  <section class="card" id="c-avisos">
-    <h2>Avisos</h2>
-    <div class="alerts" id="alerts"></div>
-  </section>
-
-  <section class="card" id="c-cuenta">
-    <h2>La cuenta paso a paso</h2>
-    <div id="detalle"></div>
-  </section>
-  </div>
-  </div>
-
-  <p class="foot">Cálculo orientativo con los supuestos de los ajustes (ITP, honorarios más IVA, tipo y plazo de la hipoteca). No sustituye la oferta de BBVA ni la opinión del gestor.</p>
+<div class="cards">
+  <a class="card" href="maqueta/"><b>Maqueta 3D</b><span>Planta baja completa, salón ampliado y baño reformado. Se gira con el ratón o el dedo.</span></a>
+  <a class="card" href="presupuesto/"><b>Presupuesto</b><span>Partidas editables con precios orientativos y total con IVA.</span></a>
+  <a class="card" href="calculadora/"><b>Calculadora de la compra</b><span>Hipoteca, cuota y colchón al comprar la casa y vender el piso.</span></a>
 </div>
 
-<script>
-/* Modelo de cálculo: compra de la casa de Foios y venta del piso.
-   Funciones puras, sin DOM. Importes en euros. */
-function pmt(capital, tipoAnual, anios) {
-  if (!(capital > 0)) return 0;
-  var i = tipoAnual / 100 / 12;
-  var n = anios * 12;
-  if (i === 0) return capital / n;
-  return (capital * i) / (1 - Math.pow(1 + i, -n));
-}
+<h2 id="casa">La casa</h2>
+<p>Planta baja alargada, con la fachada principal oblicua a la calle (oeste) y la fachada lateral al sur. De oeste a este: tres dormitorios, salón antiguo con la escalera, un segundo salón, cocina, baño y un patio con el porche y un anexo de baños y lavadero. Encima hay un salón con balcón, una terraza y la cambra.</p>
+<figure><img src="img/planta_salon.png" alt="Planta del salón ampliado"><figcaption>Planta del salón ampliado: tabique a demoler, cerramiento acristalado al patio y mobiliario de ejemplo. Cotas por la escala del plano de idealista (±10 cm).</figcaption></figure>
+<figure><img src="img/base_aerea_planta_baja.png" alt="Vista aérea de la maqueta"><figcaption>Vista aérea de la maqueta de la planta baja (sin textura).</figcaption></figure>
 
-/* IRPF base del ahorro (escala estatal + autonómica vigente: 19-21-23-27-30 %). */
-function irpfAhorro(ganancia) {
-  if (!(ganancia > 0)) return 0;
-  var tramos = [
-    [6000, 0.19],
-    [44000, 0.21],
-    [150000, 0.23],
-    [100000, 0.27],
-    [Infinity, 0.3]
-  ];
-  var resto = ganancia;
-  var total = 0;
-  for (var k = 0; k < tramos.length && resto > 0; k++) {
-    var parte = Math.min(resto, tramos[k][0]);
-    total += parte * tramos[k][1];
-    resto -= parte;
-  }
-  return total;
-}
+<h2 id="reglas">Criterios de la reforma</h2>
+<ul>
+  <li><b>Conservar el carácter:</b> vigas de madera, bovedillas, suelos hidráulicos y carpinterías de madera recuperables.</li>
+  <li><b>Humedad por capilaridad:</b> dejar visto 1 m de ladrillo macizo desde abajo, con acabados de cal transpirables, en interiores y en el tramo que corresponda de la fachada lateral.</li>
+  <li><b>Cubierta:</b> aislar e impermeabilizar manteniendo las mismas tejas árabes recuperadas.</li>
+  <li><b>Ventanas:</b> las de aluminio se sustituyen por PVC o aluminio que se integre con la casa; las de madera (pino de mobila) se restauran con buen cristal.</li>
+  <li><b>Fachadas:</b> reparar la principal y la lateral.</li>
+  <li><b>Porche y laterales:</b> siguen siendo exterior o semiabierto; se reparan zócalos y desconchados, sin cerrarlos del todo.</li>
+</ul>
 
-var DEFAULTS = {
-  precio: 400000,
-  obras: 50000,
-  obrasAntes: 30000,
-  venta: 370000,
-  ahorros: 100000,
-  padres: 100000,
-  hipoteca: 'muface',
-  tipo: 2.6,
-  plazo: 30,
-  honorariosCompra: 1.5,
-  honorariosVenta: 2.5,
-  iva: 21,
-  itp: 9,
-  gastosCompra: 2800,
-  otrosVenta: 4100,
-  pendiente: 56000,
-  cuotaActual: 350,
-  ahorrosTotales: 145000,
-  colchonMin: 30000,
-  ingresos: 5833,
-  titularidad: 75,
-  valorAdquisicion: 250000,
-  ltv: 80,
-  tasacion: 0,
-  amortPct: 100,
-  colchonObjetivo: null,
-  repartoHip: 50,
-  m2: 285,
-  mediana: 1394
-};
+<h2 id="salon">Salón ampliado</h2>
+<p>El segundo salón (19,46 m²) crece hacia el patio demoliendo solo el tabique hasta el límite de la cocina. Queda en unos 32 m², con sitio para mesa de comedor, sofás y televisión. No se toca el baño y solo se abre una ventana interior de conexión con la cocina.</p>
+<div class="grid2">
+  <figure><img src="img/base_interior_hacia_patio.png" alt="Salón hacia el patio"><figcaption>Del salón hacia el patio.</figcaption></figure>
+  <figure><img src="img/base_patio_hacia_salon.png" alt="Patio hacia el salón"><figcaption>Del patio hacia el salón.</figcaption></figure>
+</div>
+<h3>Decisiones tomadas</h3>
+<ul>
+  <li><b>Cerramiento al patio (opción A):</b> puerta de dos hojas batientes de unos 1,9 m entre dos paños fijos (1,9 + 1,9 + 1,3 m, total ≈ 5,12 m), con vidrio de baja emisividad. Se estudian dos acabados: madera o aluminio con rotura de puente térmico.</li>
+  <li><b>La cristalera actual no es original</b> (es de una reforma posterior) y se sustituye. La cristalera original de 1900 es la del paso entre el recibidor y el salón, y se conserva.</li>
+  <li><b>Suelo único:</b> se retiran el de aspecto mármol y la baldosa del patio y se unifica todo el salón ampliado. En planta baja no vale el laminado clásico; las opciones son porcelánico efecto madera, vinilo SPC o acabado tipo hidráulico/microcemento. La franja nueva necesita excavar unos 15–20 cm para encachado, lámina, aislamiento y solera.</li>
+  <li><b>Techo del hueco:</b> la franja que se suma al salón está abierta al cielo dentro de la terraza. Se cierra con forjado opaco a nivel de terraza y techo continuo, no con cubierta de vidrio.</li>
+</ul>
 
-function calcular(p) {
-  var r = {};
-  var iva = 1 + p.iva / 100;
+<h2 id="bano">Baño reformado</h2>
+<p>Conserva su superficie (5,16 m²) y no tiene ventana, porque su pared da a la medianera. Se resuelve así:</p>
+<ul>
+  <li><b>Distribución:</b> ducha a ras de suelo con panel de vidrio fijo en la esquina noreste; lavabo sobre mueble de madera e inodoro suspendido en el muro sur.</li>
+  <li><b>Acabados:</b> suelo de baldosa hidráulica de reproducción y azulejo hasta 2,10 m, con cal por encima.</li>
+  <li><b>Puerta:</b> de madera, de 0,80 m, abre hacia el salón antiguo para no ocupar espacio dentro. Lleva un montante fijo de vidrio encima para traer luz desde el salón.</li>
+  <li><b>Ventilación:</b> extractor de techo. Las tuberías de la ducha van por el muro compartido con la cocina.</li>
+</ul>
+<div class="grid2">
+  <figure><img src="img/base_bano_ducha.png" alt="Baño, zona de ducha"><figcaption>Zona de ducha.</figcaption></figure>
+  <figure><img src="img/base_bano_lavabo.png" alt="Baño, lavabo e inodoro"><figcaption>Lavabo e inodoro.</figcaption></figure>
+  <figure><img src="img/base_bano_puerta.png" alt="Baño, puerta"><figcaption>Puerta con montante de vidrio.</figcaption></figure>
+  <figure><img src="img/base_salon_antiguo.png" alt="Salón antiguo"><figcaption>Salón antiguo hacia el nuevo.</figcaption></figure>
+</div>
 
-  /* Compra */
-  r.itp = p.precio * (p.itp / 100);
-  r.honorariosCompra = p.precio * (p.honorariosCompra / 100) * iva;
-  r.totalCompra = p.precio + r.itp + r.honorariosCompra + p.gastosCompra;
-  r.obrasAntes = Math.min(p.obrasAntes, p.obras);
-  r.obrasDespues = p.obras - r.obrasAntes;
-  r.pagarAhora = r.totalCompra + r.obrasAntes;
-  r.disponible = p.ahorros + p.padres;
-  r.baseTasacion = p.tasacion > 0 ? Math.min(p.precio, p.tasacion) : p.precio;
-  r.maxHipoteca = r.baseTasacion * (p.ltv / 100);
-  var falta = r.pagarAhora - r.disponible;
-  r.hipotecaAlComprar = Math.max(0, Math.min(falta, r.maxHipoteca));
-  r.faltaEntrada = Math.max(0, falta - r.maxHipoteca);
-  r.sobraPrestamo = Math.max(0, -falta);
-  r.tasacionMinima = r.hipotecaAlComprar / (p.ltv / 100);
-  r.precioM2 = p.m2 > 0 ? p.precio / p.m2 : 0;
-  r.liquidoTrasCompra = p.ahorrosTotales - p.ahorros - r.faltaEntrada + r.sobraPrestamo;
+<h2 id="envolvente">Envolvente: humedades, cubierta y fachadas</h2>
+<ul>
+  <li>Las señales de humedad más claras están en el patio, el lavadero y la fachada lateral. Muchas zonas interiores son obra nueva de una reforma anterior. Conviene medir la humedad antes de dejar el ladrillo a la vista.</li>
+  <li>La cubierta se levanta, se impermeabiliza y se aísla, y se vuelven a colocar las mismas tejas árabes.</li>
+</ul>
 
-  /* Venta del piso */
-  r.honorariosVenta = p.venta * (p.honorariosVenta / 100) * iva;
-  r.netoVenta = p.venta - p.pendiente - r.honorariosVenta - p.otrosVenta;
-  r.caja = r.netoVenta - p.padres - r.obrasDespues;
-  var maxAmort = Math.max(0, Math.min(r.caja, r.hipotecaAlComprar));
-  r.liquidoSinAmortizar = r.liquidoTrasCompra + r.caja; /* efectivo máximo que puedes quedarte */
-  r.colchonMinimoPosible = r.liquidoSinAmortizar - maxAmort; /* efectivo si amortizas todo lo posible */
-  var objetivo = (p.colchonObjetivo !== null && p.colchonObjetivo !== undefined && p.colchonObjetivo >= 0) ? p.colchonObjetivo : null;
-  r.amortizacion = objetivo !== null
-    ? Math.max(0, Math.min(maxAmort, r.liquidoSinAmortizar - objetivo))
-    : maxAmort * (p.amortPct / 100);
-  r.amortPctEf = maxAmort > 0 ? (r.amortizacion / maxAmort) * 100 : 0;
-  r.colchonObjetivoAlcanzable = objetivo === null || (objetivo >= r.colchonMinimoPosible - 1 && objetivo <= r.liquidoSinAmortizar + 1);
-  r.hipotecaFinal = r.hipotecaAlComprar - r.amortizacion;
-  r.sobraTrasVender = Math.max(0, r.caja - r.hipotecaAlComprar);
-  r.faltaTrasVender = Math.max(0, -r.caja);
-  r.liquidoFinal = r.liquidoTrasCompra + (r.caja - r.amortizacion);
+<h2 id="cambra">Cambra (fase posterior)</h2>
+<p>Suelo laminado con base aislante. Más adelante, distribución de habitaciones junto a las ventanas con tabiques o vidrios que dejen pasar la luz, y un baño con preinstalaciones.</p>
 
-  /* Aportaciones (hipoteca final repartida según repartoHip % de Julia) */
-  r.aportTu = (r.pagarAhora - r.hipotecaAlComprar) + r.obrasDespues + r.amortizacion;
-  r.aportTotal = r.totalCompra + p.obras;
-  r.aportTuPct = r.aportTotal > 0 ? (r.aportTu + r.hipotecaFinal * (1 - p.repartoHip / 100)) / r.aportTotal : 0;
+<h2 id="pendiente">Pendiente de confirmar</h2>
+<ul>
+  <li>Posición norte–sur exacta del hueco abierto de la terraza (ahora estimada).</li>
+  <li>Alturas de la terraza y del salón, y si la parte antigua también tiene 2,98 m.</li>
+  <li><b>Revisión de un técnico</b> de la viga a lo largo del cerramiento y de su apoyo en los brazos existentes. El tabique actual no es de carga, pero la estructura del hueco sí hay que comprobarla.</li>
+  <li>Licencia de obra mayor: aumenta la superficie cubierta.</li>
+  <li>Medición de humedades antes de actuar en cada muro.</li>
+</ul>
+<p class="note">Todo es esquemático y orientativo; no es un proyecto técnico. Las cotas salen de la escala del plano de idealista.</p>
 
-  /* Cuotas */
-  r.cuotaAlComprar = pmt(r.hipotecaAlComprar, p.tipo, p.plazo);
-  r.cuotaMientrasVendeis = r.cuotaAlComprar + p.cuotaActual;
-  r.cuotaFinal = pmt(r.hipotecaFinal, p.tipo, p.plazo);
-
-  /* Comisión por amortizar */
-  if (p.hipoteca === 'muface') {
-    r.comisionTope = 0;
-  } else {
-    var libre = p.hipoteca === 'otro' ? 0 : 0.25 * r.hipotecaAlComprar;
-    r.comisionTope = 0.02 * Math.max(0, r.amortizacion - libre);
-  }
-
-  /* Hacienda */
-  r.importeObtenido = r.netoVenta; /* venta - hipoteca pendiente - gastos de venta (confirmar con gestor) */
-  r.parteTuya = r.totalCompra * (p.titularidad / 100);
-  r.titularidadMinima = r.totalCompra > 0 ? r.importeObtenido / r.totalCompra : 0;
-  r.ventaMaxCubierta = (r.parteTuya + p.pendiente + p.otrosVenta) / (1 - (p.honorariosVenta / 100) * iva);
-  r.reinvierteTodo = r.parteTuya >= r.importeObtenido;
-  r.sinReinvertir = Math.max(0, r.importeObtenido - r.parteTuya);
-  r.plusvalia = p.venta - r.honorariosVenta - p.otrosVenta - p.valorAdquisicion;
-  r.irpfSinExencion = irpfAhorro(r.plusvalia);
-
-  /* Ratios */
-  r.ratioMientrasVendeis = p.ingresos > 0 ? r.cuotaMientrasVendeis / p.ingresos : 0;
-  r.ratioFinal = p.ingresos > 0 ? r.cuotaFinal / p.ingresos : 0;
-  r.honorariosTotales = r.honorariosCompra + r.honorariosVenta;
-  return r;
-}
-
-if (typeof module !== 'undefined') {
-  module.exports = { pmt: pmt, irpfAhorro: irpfAhorro, calcular: calcular, DEFAULTS: DEFAULTS };
-}
-
-
-(function () {
-  var P = Object.assign({}, DEFAULTS);
-
-  var FIELDS = [
-    { id: 'precio', label: 'Precio de compra (oferta)', min: 340000, max: 460000, step: 1000, dyn: true },
-    { id: 'obras', label: 'Obras totales', min: 0, max: 150000, step: 5000 },
-    { id: 'obrasAntes', label: 'Obras que se hacen antes de vender', min: 0, max: 150000, step: 5000, hint: 'Lo que pase del total de obras no cuenta.' },
-    { id: 'venta', label: 'Precio de venta del piso', min: 300000, max: 500000, step: 1000 },
-    { id: 'ahorros', label: 'Ahorros que ponéis', min: 40000, max: 145000, step: 1000 },
-    { id: 'padres', label: 'Préstamo de tus padres', min: 0, max: 150000, step: 5000, hint: 'Se devuelve con el dinero del piso. No cambia la hipoteca final.' },
-    { id: 'amortPct', label: 'Parte del dinero del piso que amortiza', min: 0, max: 100, step: 5, unit: '%', hint: '100 % = amortizas todo lo que sobre. 0 % = te lo quedas en efectivo.' },
-    { id: 'colchonObjetivo', label: 'Efectivo que quiero tener tras vender', min: 0, max: 400000, step: 5000, hint: 'Mueve esto y la calculadora ajusta lo que amortizas. Incluye lo que ya te queda tras la compra.' }
-  ];
-
-  var ADJ = [
-    { id: 'hipoteca', label: 'Hipoteca', type: 'select', wide: true, options: [
-      ['muface', 'MUFACE fijo 2,60 %: amortización parcial sin comisión'],
-      ['rentas', 'Rentas Altas 2,75 %: 25 % anual libre, resto hasta 2 %'],
-      ['rentas265', 'Rentas Altas con seguros 2,65 % (por autorizar)'],
-      ['otro', 'Otra: comisión hasta 2 % de lo amortizado']
-    ] },
-    { id: 'tipo', label: 'Tipo de interés (%)', type: 'dec' },
-    { id: 'plazo', label: 'Plazo (años)', type: 'int' },
-    { id: 'honorariosCompra', label: 'Honorarios compra (% + IVA)', type: 'dec' },
-    { id: 'honorariosVenta', label: 'Honorarios venta (% + IVA)', type: 'dec' },
-    { id: 'itp', label: 'ITP de la compra (%)', type: 'select', options: [['9', '9 %'], ['10', '10 %']] },
-    { id: 'gastosCompra', label: 'Notaría, registro y tasación (€)', type: 'int' },
-    { id: 'tasacion', label: 'Tasación de la casa (€, 0 = igual al precio)', type: 'int' },
-    { id: 'otrosVenta', label: 'Otros gastos de venta (€)', type: 'int' },
-    { id: 'pendiente', label: 'Hipoteca actual pendiente (€)', type: 'int' },
-    { id: 'cuotaActual', label: 'Cuota hipoteca actual (€/mes)', type: 'int' },
-    { id: 'ahorrosTotales', label: 'Ahorros totales (€)', type: 'int' },
-    { id: 'colchonMin', label: 'Colchón mínimo (€)', type: 'int' },
-    { id: 'ingresos', label: 'Ingresos netos al mes (€)', type: 'int' },
-    { id: 'titularidad', label: 'Tu titularidad (%)', type: 'int' },
-    { id: 'repartoHip', label: 'Hipoteca que asume Julia (%)', type: 'int' },
-    { id: 'm2', label: 'Metros construidos de la casa', type: 'int' },
-    { id: 'mediana', label: 'Mediana de la zona (€/m²)', type: 'int' },
-    { id: 'valorAdquisicion', label: 'Valor de adquisición del piso (€)', type: 'int' }
-  ];
-
-  var PRESETS = { muface: 2.6, rentas: 2.75, rentas265: 2.65 };
-
-  function num(n) {
-    var neg = n < 0;
-    var s = Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    return (neg ? '-' : '') + s;
-  }
-  function eur(n) { return num(n) + ' €'; }
-  function pct(x, d) { return (x * 100).toFixed(d || 0).replace('.', ',') + ' %'; }
-  function dec(n) { return String(n).replace('.', ','); }
-  function $(id) { return document.getElementById(id); }
-  function parse(str, decimal) {
-    var s = String(str).replace(/\s/g, '');
-    if (decimal) { s = s.replace(/\./g, '').replace(',', '.'); var f = parseFloat(s); return isNaN(f) ? 0 : f; }
-    var d = s.replace(/[^0-9]/g, '');
-    return d === '' ? 0 : parseInt(d, 10);
-  }
-
-  /* Controles principales */
-  var fieldsEl = $('fields');
-  FIELDS.forEach(function (f) {
-    var div = document.createElement('div');
-    div.className = 'field';
-    div.innerHTML =
-      '<div class="field-top"><label for="n-' + f.id + '">' + f.label + '</label>' +
-      '<div class="num"><input id="n-' + f.id + '" type="text" inputmode="numeric" autocomplete="off"><span>' + (f.unit || '€') + '</span></div></div>' +
-      '<input id="r-' + f.id + '" type="range" min="' + f.min + '" max="' + f.max + '" step="' + f.step + '" aria-label="' + f.label + '">' +
-      (f.hint ? '<p class="hint">' + f.hint + '</p>' : '') + (f.dyn ? '<p class="hint" id="h-' + f.id + '"></p>' : '');
-    fieldsEl.appendChild(div);
-    var n = div.querySelector('#n-' + f.id);
-    var r = div.querySelector('#r-' + f.id);
-    function tocado() { if (f.id === 'amortPct') { P.colchonObjetivo = null; } }
-    r.addEventListener('input', function () { P[f.id] = parseInt(r.value, 10); tocado(); n.value = num(P[f.id]); update(); });
-    n.addEventListener('input', function () { P[f.id] = parse(n.value); tocado(); r.value = P[f.id]; update(); });
-    n.addEventListener('blur', function () { n.value = num(P[f.id] === null ? 0 : P[f.id]); update(); });
-  });
-
-  /* Ajustes */
-  var adjEl = $('ajustes');
-  ADJ.forEach(function (a) {
-    var div = document.createElement('div');
-    div.className = 'a' + (a.wide ? ' wide' : '');
-    var html = '<label for="a-' + a.id + '">' + a.label + '</label>';
-    if (a.type === 'select') {
-      html += '<select id="a-' + a.id + '">' + a.options.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select>';
-    } else {
-      html += '<input id="a-' + a.id + '" type="text" inputmode="' + (a.type === 'dec' ? 'decimal' : 'numeric') + '" autocomplete="off">';
-    }
-    div.innerHTML = html;
-    adjEl.appendChild(div);
-    var el = div.querySelector('#a-' + a.id);
-    if (a.type === 'select') {
-      el.addEventListener('change', function () {
-        if (a.id === 'itp') { P.itp = parseInt(el.value, 10); }
-        else {
-          P.hipoteca = el.value;
-          if (PRESETS[el.value]) { P.tipo = PRESETS[el.value]; $('a-tipo').value = dec(P.tipo.toFixed(2)); }
-        }
-        update();
-      });
-    } else {
-      el.addEventListener('input', function () { P[a.id] = parse(el.value, a.type === 'dec'); update(); });
-    }
-  });
-
-  function syncInputs() {
-    FIELDS.forEach(function (f) {
-      if (P[f.id] === null) { return; }
-      $('n-' + f.id).value = num(P[f.id]);
-      $('r-' + f.id).value = P[f.id];
-    });
-    ADJ.forEach(function (a) {
-      var el = $('a-' + a.id);
-      if (a.type === 'select') { el.value = a.id === 'itp' ? String(P.itp) : P.hipoteca; }
-      else if (a.type === 'dec') { el.value = dec(Number(P[a.id]).toFixed(2)); }
-      else { el.value = num(P[a.id]); }
-    });
-  }
-
-  function alerta(estado, titulo, detalle) {
-    return '<div class="alert ' + estado + '"><b>' + titulo + '</b><span>' + detalle + '</span></div>';
-  }
-
-  var last = null;
-  function update() {
-    var r = calcular(P);
-    last = r;
-
-    /* Resultado fijo */
-    $('r-final').textContent = eur(r.hipotecaFinal);
-    $('r-final-s').textContent = eur(r.cuotaFinal) + ' al mes';
-    $('r-m0').textContent = eur(r.hipotecaAlComprar);
-    $('r-m0-s').textContent = eur(r.cuotaMientrasVendeis) + '/mes con la actual';
-    /* Los dos controles de amortización van enlazados: el que no tocas muestra el valor resultante */
-    var enfocado = document.activeElement && document.activeElement.id;
-    if (P.colchonObjetivo === null) {
-      if (enfocado !== 'n-colchonObjetivo') { $('n-colchonObjetivo').value = num(r.liquidoFinal); }
-      $('r-colchonObjetivo').value = Math.round(r.liquidoFinal);
-    } else {
-      if (enfocado !== 'n-amortPct') { $('n-amortPct').value = num(r.amortPctEf); }
-      $('r-amortPct').value = Math.round(r.amortPctEf);
-    }
-    var colchon = Math.min(r.liquidoTrasCompra, r.liquidoFinal);
-    $('r-colchon').textContent = eur(r.liquidoFinal);
-    $('r-colchon-s').textContent = 'mínimo ' + eur(P.colchonMin);
-    $('tile-colchon').className = 'tile' + (colchon < P.colchonMin ? ' low' : '');
-
-    /* Avisos */
-    var A = [];
-    if (r.faltaEntrada > 0) {
-      A.push(alerta('bad', 'No llega la entrada', 'El banco presta como máximo ' + eur(r.maxHipoteca) + ' (' + P.ltv + ' %). Faltan ' + eur(r.faltaEntrada) + ' antes de vender; saldrían del colchón o de dejar obras para después.'));
-    } else if (r.sobraPrestamo > 0) {
-      A.push(alerta('warn', 'Pedís más a tus padres de lo necesario', 'Os sobran ' + eur(r.sobraPrestamo) + ' tras la compra. Podéis pedirles menos.'));
-    } else {
-      A.push(alerta('ok', 'Financiación dentro del límite', 'Hipoteca de ' + eur(r.hipotecaAlComprar) + ' sobre un máximo de ' + eur(r.maxHipoteca) + ' (' + P.ltv + ' % del precio).'));
-    }
-    if (colchon < P.colchonMin) {
-      A.push(alerta('bad', 'El colchón baja de lo previsto', 'Quedaría en ' + eur(Math.min(r.liquidoTrasCompra, r.liquidoFinal)) + ' y el mínimo es ' + eur(P.colchonMin) + '.'));
-    } else {
-      A.push(alerta('ok', 'Colchón protegido', 'Queda ' + eur(Math.min(r.liquidoTrasCompra, r.liquidoFinal)) + ' (mínimo ' + eur(P.colchonMin) + ').'));
-    }
-    if (!r.colchonObjetivoAlcanzable) {
-      A.push(alerta('warn', 'No se puede llegar a ese colchón', 'Con esta venta y estas obras el efectivo final va de ' + eur(r.colchonMinimoPosible) + ' (amortizando todo lo posible) a ' + eur(r.liquidoSinAmortizar) + ' (sin amortizar).'));
-    }
-    if (r.faltaTrasVender > 0) {
-      A.push(alerta('bad', 'El piso no cubre todo al venderlo', 'Faltarían ' + eur(r.faltaTrasVender) + ' para devolver a tus padres y pagar las obras pendientes.'));
-    }
-    A.push(alerta(r.ratioMientrasVendeis > 0.35 ? 'warn' : 'ok',
-      'Cuota mientras vendéis: ' + eur(r.cuotaMientrasVendeis) + '/mes',
-      'Hipoteca nueva ' + eur(r.cuotaAlComprar) + ' más la actual ' + eur(P.cuotaActual) + ': ' + pct(r.ratioMientrasVendeis) + ' de ' + eur(P.ingresos) + ' (límite 35 %).'));
-    A.push(alerta('ok', 'Cuota final: ' + eur(r.cuotaFinal) + '/mes', pct(r.ratioFinal) + ' de vuestros ingresos netos.'));
-    if (r.reinvierteTodo) {
-      A.push(alerta('ok', 'Exención por reinversión cubierta', 'Tu parte de la compra (' + eur(r.parteTuya) + ') llega al importe a reinvertir del piso (' + eur(r.importeObtenido) + '). Titularidad mínima ' + pct(r.titularidadMinima) + '.'));
-    } else {
-      A.push(alerta('warn', 'No reinvertís todo el importe del piso', 'Tu parte (' + eur(r.parteTuya) + ') no llega a ' + eur(r.importeObtenido) + ': ' + eur(r.sinReinvertir) + ' sin reinvertir. Sube tu titularidad a ' + pct(r.titularidadMinima) + ' o más.'));
-    }
-    var hon = 'Total con IVA: ' + eur(r.honorariosTotales) + ' (compra ' + eur(r.honorariosCompra) + ', venta ' + eur(r.honorariosVenta) + ').';
-    A.push(alerta(P.honorariosCompra > 2 ? 'warn' : 'ok', P.honorariosCompra > 2 ? 'Honorarios de compra por encima del 2 %' : 'Honorarios dentro del límite', hon));
-    if (r.comisionTope > 0) {
-      A.push(alerta('warn', 'Comisión por amortizar: hasta ' + eur(r.comisionTope), 'Es un tope (2 %). Repartir la amortización entre dos años la reduce.'));
-    } else {
-      A.push(alerta('ok', 'Amortizar sin comisión', 'La amortización parcial de ' + eur(r.amortizacion) + ' no paga compensación.'));
-    }
-    var dif = Math.abs(r.aportTuPct * 100 - P.titularidad);
-    A.push(alerta(dif > 5 ? 'warn' : 'ok', 'Aportaciones: tú ' + pct(r.aportTuPct) + ', Julia ' + pct(1 - r.aportTuPct),
-      'Con la hipoteca final repartida ' + (100 - P.repartoHip) + '/' + P.repartoHip + ', lo que pones tú es el ' + pct(r.aportTuPct) + ' del total. La escritura dice ' + P.titularidad + ' %.' + (dif > 5 ? ' Conviene un pacto de aportaciones o ajustar el porcentaje.' : '')));
-    $('alerts').innerHTML = A.join('');
-
-    /* Chivatos fijos arriba */
-    var C = [];
-    function chip(e, txt) { C.push({ e: e, t: txt }); }
-    if (r.faltaEntrada > 0) chip('bad', 'Falta entrada ' + eur(r.faltaEntrada));
-    else if (r.sobraPrestamo > 0) chip('warn', 'Sobran ' + eur(r.sobraPrestamo) + ' de tus padres');
-    else chip('ok', 'Entrada');
-    if (P.precio > 0 && r.tasacionMinima / P.precio > 0.97) chip('warn', 'Tasación mínima ' + eur(r.tasacionMinima));
-    else chip('ok', 'Tasación');
-    if (colchon < P.colchonMin) chip('bad', 'Colchón bajo ' + eur(colchon));
-    else chip('ok', 'Colchón');
-    if (r.faltaTrasVender > 0) chip('bad', 'Piso no cubre: faltan ' + eur(r.faltaTrasVender));
-    else chip('ok', 'Piso cubre');
-    chip(r.ratioMientrasVendeis > 0.35 ? 'warn' : 'ok', 'Cuota puente ' + pct(r.ratioMientrasVendeis));
-    chip(r.ratioFinal > 0.35 ? 'warn' : 'ok', 'Cuota final ' + pct(r.ratioFinal));
-    chip(r.reinvierteTodo ? 'ok' : 'warn', r.reinvierteTodo ? 'Reinversión' : 'Reinversión: faltan ' + eur(r.sinReinvertir));
-    if (P.honorariosCompra > 2) chip('warn', 'Honorarios compra > 2 %');
-    if (r.comisionTope > 0) chip('warn', 'Comisión amortizar ≤ ' + eur(r.comisionTope));
-    if (dif > 5) chip('warn', 'Reparto ' + pct(r.aportTuPct) + ' vs escritura ' + P.titularidad + ' %');
-    if (P.mediana > 0) {
-      var sobre = r.precioM2 / P.mediana - 1;
-      chip(sobre > 0.1 ? 'warn' : 'ok', eur(r.precioM2) + '/m²' + (sobre > 0.1 ? ' (+' + pct(sobre) + ' zona)' : ''));
-    }
-    var orden = { bad: 0, warn: 1, ok: 2 };
-    C.sort(function (a, b) { return orden[a.e] - orden[b.e]; });
-    var nb = C.filter(function (c) { return c.e === 'bad'; }).length;
-    var nw = C.filter(function (c) { return c.e === 'warn'; }).length;
-    var sum = nb ? '<span class="chip bad sum">' + nb + (nb === 1 ? ' problema' : ' problemas') + '</span>'
-      : nw ? '<span class="chip warn sum">' + nw + (nw === 1 ? ' aviso' : ' avisos') + '</span>'
-      : '<span class="chip ok sum">Todo en orden</span>';
-    $('chips').innerHTML = sum + C.map(function (c) { return '<span class="chip ' + c.e + '">' + c.t + '</span>'; }).join('');
-    if ($('h-precio')) {
-      var d = P.mediana > 0 ? r.precioM2 / P.mediana - 1 : 0;
-      $('h-precio').textContent = eur(r.precioM2) + '/m² · mediana de la zona ≈ ' + eur(P.mediana) + '/m² (' + (d >= 0 ? '+' : '') + pct(d) + ')';
-    }
-
-    /* Cuenta paso a paso */
-    function row(k, v, cls) { return '<div' + (cls ? ' class="' + cls + '"' : '') + '><dt>' + k + '</dt><dd>' + v + '</dd></div>'; }
-    var D = '';
-    D += '<p class="block-title">1. Al comprar</p><dl class="rows">' +
-      row('Casa', eur(P.precio)) +
-      row('ITP ' + P.itp + ' %', eur(r.itp)) +
-      row('Honorarios ' + dec(P.honorariosCompra) + ' % + IVA', eur(r.honorariosCompra)) +
-      row('Notaría, registro y tasación', eur(P.gastosCompra)) +
-      row('Total de la compra', eur(r.totalCompra), 'tot') +
-      row('Obras antes de vender', eur(r.obrasAntes)) +
-      row('A pagar ahora', eur(r.pagarAhora), 'tot') +
-      '</dl>';
-    D += '<p class="block-title">Cómo se paga</p><dl class="rows">' +
-      row('Ahorros', eur(P.ahorros)) +
-      row('Préstamo de tus padres', eur(P.padres)) +
-      row('Hipoteca', eur(r.hipotecaAlComprar), 'tot') +
-      (r.faltaEntrada > 0 ? row('Del colchón (falta)', eur(r.faltaEntrada)) : '') +
-      row('Tasación mínima para esta hipoteca', eur(r.tasacionMinima)) +
-      '</dl>';
-    D += '<p class="block-title">2. Al vender el piso</p><dl class="rows">' +
-      row('Venta', eur(P.venta)) +
-      row('Hipoteca actual', '-' + eur(P.pendiente)) +
-      row('Honorarios ' + dec(P.honorariosVenta) + ' % + IVA', '-' + eur(r.honorariosVenta)) +
-      row('Otros gastos de venta', '-' + eur(P.otrosVenta)) +
-      row('Cobro neto', eur(r.netoVenta), 'tot') +
-      row('Devolver a tus padres', '-' + eur(P.padres)) +
-      row('Obras pendientes', '-' + eur(r.obrasDespues)) +
-      row('Disponible para amortizar', eur(r.caja), 'tot') +
-      row('Amortización de la hipoteca', eur(r.amortizacion)) +
-      row('Efectivo del piso que te quedas', eur(Math.max(0, r.caja - r.amortizacion))) +
-      row('Hipoteca final', eur(r.hipotecaFinal), 'tot') +
-      row('Cuota final', eur(r.cuotaFinal) + '/mes') +
-      '</dl>';
-    D += '<p class="block-title">3. Hacienda (orientativo)</p><dl class="rows">' +
-      row('Importe a reinvertir (venta menos hipoteca y gastos de venta)', eur(r.importeObtenido)) +
-      row('Venta máxima cubierta con tu titularidad', eur(r.ventaMaxCubierta)) +
-      row('Tu parte de la compra (' + P.titularidad + ' %)', eur(r.parteTuya)) +
-      row('Plusvalía estimada del piso', eur(r.plusvalia)) +
-      row('IRPF si no hubiera exención', eur(r.irpfSinExencion)) +
-      '</dl>';
-    D += '<p class="block-title">4. Aportaciones (para el reparto)</p><dl class="rows">' +
-      row('Pones tú: efectivo, obras y amortización', eur(r.aportTu)) +
-      row('Tu parte de la hipoteca final (' + (100 - P.repartoHip) + ' %)', eur(r.hipotecaFinal * (1 - P.repartoHip / 100))) +
-      row('Parte de Julia en la hipoteca final (' + P.repartoHip + ' %)', eur(r.hipotecaFinal * P.repartoHip / 100)) +
-      row('Total de la compra y las obras', eur(r.aportTotal)) +
-      row('Tu aportación', pct(r.aportTuPct, 1), 'tot') +
-      row('Titularidad en la escritura', P.titularidad + ' %') +
-      '</dl>';
-    $('detalle').innerHTML = D;
-  }
-
-  function resumen() {
-    var r = last || calcular(P);
-    var t = [];
-    t.push('Calculadora casa Foios (orientativo)');
-    t.push('Compra ' + eur(P.precio) + ' · Obras ' + eur(P.obras) + ' (' + eur(r.obrasAntes) + ' antes de vender) · Venta del piso ' + eur(P.venta));
-    t.push('Ahorros ' + eur(P.ahorros) + ' · Préstamo de padres ' + eur(P.padres) + ' · Hipoteca ' + dec(Number(P.tipo).toFixed(2)) + ' % a ' + P.plazo + ' años');
-    t.push('');
-    t.push('Al comprar: hipoteca ' + eur(r.hipotecaAlComprar) + ', cuota ' + eur(r.cuotaAlComprar) + ' (' + eur(r.cuotaMientrasVendeis) + ' con la actual)');
-    t.push('Al vender: devolver ' + eur(P.padres) + ' a los padres y amortizar ' + eur(r.amortizacion));
-    t.push('Hipoteca final: ' + eur(r.hipotecaFinal) + ', cuota ' + eur(r.cuotaFinal) + '/mes');
-    t.push('Colchón final: ' + eur(r.liquidoFinal) + ' (máximo posible sin amortizar: ' + eur(r.liquidoSinAmortizar) + ')');
-    t.push('Efectivo del piso que te quedas: ' + eur(Math.max(0, r.caja - r.amortizacion)) + ' · Tasación mínima ' + eur(r.tasacionMinima));
-    t.push('Aportaciones: tú ' + pct(r.aportTuPct, 1) + ', Julia ' + pct(1 - r.aportTuPct, 1) + ' (escritura ' + P.titularidad + ' %)');
-    t.push('Honorarios totales con IVA: ' + eur(r.honorariosTotales));
-    t.push('Reinversión: ' + (r.reinvierteTodo ? 'cubierta' : 'faltan ' + eur(r.sinReinvertir)));
-    return t.join('\n');
-  }
-
-  $('copy').addEventListener('click', function () {
-    var text = resumen();
-    var note = $('copy-note');
-    var fb = $('fallback');
-    function mostrarFallback() {
-      fb.style.display = 'block';
-      fb.value = text;
-      fb.focus();
-      fb.select();
-      note.textContent = 'Selecciona y copia el texto.';
-    }
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () {
-          fb.style.display = 'none';
-          note.textContent = 'Resumen copiado.';
-        }, mostrarFallback);
-      } else { mostrarFallback(); }
-    } catch (e) { mostrarFallback(); }
-  });
-
-  $('reset').addEventListener('click', function () {
-    P = Object.assign({}, DEFAULTS);
-    syncInputs();
-    update();
-    $('copy-note').textContent = '';
-  });
-
-  syncInputs();
-  update();
-})();
-</script>
+<footer>Proyecto personal · uso privado de la familia.</footer>
+</main>
 </body>
 </html>

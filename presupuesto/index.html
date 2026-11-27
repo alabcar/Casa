@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Presupuesto · Casa de Foios</title>
+<link rel="stylesheet" href="../assets.css">
+<style>
+ input[type=number]{width:96px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font:inherit;text-align:right;background:#fff}
+ td.r,th.r{text-align:right;white-space:nowrap}
+ tr.grp td{background:#f1ece1;font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+ .tot{margin-top:16px;max-width:380px;margin-left:auto}
+ .tot div{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line)}
+ .tot .big{font-size:20px;font-weight:700;border-bottom:0}
+ button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 14px;cursor:pointer}
+ .wrap{overflow-x:auto}
+ label.f{display:inline-flex;gap:6px;align-items:center;margin-right:16px;font-size:15px}
+</style>
+</head>
+<body>
+<header class="top"><nav><b>Casa de Foios</b><a href="../">Proyecto</a><a href="../maqueta/">Maqueta 3D</a><a href="./">Presupuesto</a><a href="../calculadora/">Calculadora</a></nav></header>
+<main>
+<h1>Presupuesto de la reforma</h1>
+<p class="lead">Partidas con mediciones sacadas de los planos y precios <b>orientativos</b> míos, sin ningún presupuesto real detrás. Cambia cantidades y precios y el total se recalcula. Se guardan solo en este navegador.</p>
+<p class="note">Sirve para ordenar ideas y comparar fases, no para decidir. Hay que sustituir los precios por los de presupuestos de empresas de Foios o Valencia. Las partidas 3 y 5 dependen de un técnico.</p>
+
+<p>
+  <label class="f">IVA <select id="iva"><option value="0.10">10 % (reforma de vivienda)</option><option value="0.21">21 %</option><option value="0">Sin IVA</option></select></label>
+  <label class="f">Imprevistos <input type="number" id="imp" value="10" min="0" max="40" step="1" style="width:64px"> %</label>
+  <button id="reset">Restaurar valores iniciales</button>
+</p>
+
+<div class="wrap"><table id="t">
+<thead><tr><th>Partida</th><th class="r">Cantidad</th><th>Ud.</th><th class="r">Precio ud. (€)</th><th class="r">Importe (€)</th></tr></thead>
+<tbody></tbody></table></div>
+
+<div class="tot">
+  <div><span>Subtotal fase 1</span><b id="s1">–</b></div>
+  <div><span>Subtotal fase 2 (cambra)</span><b id="s2">–</b></div>
+  <div><span>Imprevistos</span><b id="simp">–</b></div>
+  <div><span>IVA</span><b id="siva">–</b></div>
+  <div class="big"><span>Total fase 1</span><span id="t1">–</span></div>
+  <div class="big"><span>Total con fase 2</span><span id="t2">–</span></div>
+</div>
+
+<footer><a href="../">← Volver al proyecto</a></footer>
+</main>
+
+<script>
+"use strict";
+/* [id, fase, grupo, descripción, cantidad, unidad, precio] */
+const ROWS=[
+ ["g","1","Obra del salón ampliado"],
+ ["demol","1","","1. Demolición del tabique y gestión de escombros",1,"global",1800],
+ ["cerr","1","","2. Cerramiento acristalado al patio (≈5,1 × 2,98 m, vidrio bajo emisivo)",15.2,"m²",750],
+ ["viga","1","","3. Viga y forjado que cierran el hueco de la terraza (≈6,4 m²) + estudio estructural",1,"global",4800],
+ ["suelo","1","","4. Excavación, aislamiento, solera y suelo único del salón (≈32 m²)",32,"m²",95],
+ ["conex","1","","5. Ventana interior de conexión cocina–salón (≈1,5 m)",1,"ud",900],
+ ["inst","1","","6. Electricidad e iluminación del salón y cocina; climatización",1,"global",3800],
+ ["g","1","Baño"],
+ ["bano","1","","7. Baño reformado completo (5,2 m²: ducha, sanitarios, mueble, azulejo, suelo hidráulico, extractor)",1,"global",8200],
+ ["puerta","1","","8. Puerta de madera 0,80 m con montante de vidrio",1,"ud",900],
+ ["g","1","Envolvente"],
+ ["cub","1","","9. Cubierta: levantar, impermeabilizar, aislar y recolocar las tejas árabes (superficie por medir)",90,"m²",130],
+ ["vent_n","1","","10. Ventanas nuevas de PVC o aluminio para sustituir las de aluminio",6,"ud",750],
+ ["vent_r","1","","11. Restauración de ventanas y puertas de madera (pino) con vidrio aislante",8,"ud",520],
+ ["fach","1","","12. Reparación de la fachada principal y de la lateral",1,"global",7500],
+ ["hum","1","","13. Ladrillo visto 1 m con cal transpirable y tratamiento de humedades",45,"m²",70],
+ ["porche","1","","14. Porche y laterales: reparación de zócalos y desconchados",1,"global",1800],
+ ["g","1","Técnicos y licencias"],
+ ["proy","1","","15. Proyecto y dirección de obra (arquitecto / aparejador)",1,"global",5500],
+ ["lic","1","","16. Licencia de obra mayor y tasas",1,"global",1800],
+ ["g","2","Fase 2 · cambra"],
+ ["camb","2","","17. Suelo laminado con base aislante",40,"m²",38],
+ ["cambp","2","","18. Tabiques y vidrios de distribución junto a las ventanas",1,"global",6000],
+ ["cambb","2","","19. Baño de la cambra: solo preinstalaciones",1,"global",2800]
+];
+const KEY="casa-foios-presupuesto-v1";
+let saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){}
+const tb=document.querySelector("#t tbody");
+const fmt=n=>n.toLocaleString("es-ES",{maximumFractionDigits:0})+" €";
+const val={};
+ROWS.forEach(r=>{
+  const tr=document.createElement("tr");
+  if(r[0]==="g"){ tr.className="grp"; tr.innerHTML=`<td colspan="5">${r[2]}</td>`; tb.appendChild(tr); return; }
+  const id=r[0], s=saved[id]||{};
+  val[id]={q:s.q??r[4], p:s.p??r[6], f:r[1], q0:r[4], p0:r[6]};
+  tr.innerHTML=`<td>${r[3]}</td><td class="r"><input type="number" step="any" min="0" data-id="${id}" data-k="q" value="${val[id].q}"></td><td>${r[5]}</td><td class="r"><input type="number" step="any" min="0" data-id="${id}" data-k="p" value="${val[id].p}"></td><td class="r" id="i_${id}"></td>`;
+  tb.appendChild(tr);
+});
+function calc(){
+  let s={1:0,2:0};
+  for(const id in val){ const v=val[id], imp=(+v.q||0)*(+v.p||0); document.getElementById("i_"+id).textContent=fmt(imp); s[v.f]+=imp; }
+  const imp=(+document.getElementById("imp").value||0)/100, iva=+document.getElementById("iva").value;
+  const b1=s[1]*(1+imp), b2=(s[1]+s[2])*(1+imp);
+  document.getElementById("s1").textContent=fmt(s[1]);
+  document.getElementById("s2").textContent=fmt(s[2]);
+  document.getElementById("simp").textContent=fmt((s[1]+s[2])*imp);
+  document.getElementById("siva").textContent=fmt(b2*iva);
+  document.getElementById("t1").textContent=fmt(b1*(1+iva));
+  document.getElementById("t2").textContent=fmt(b2*(1+iva));
+}
+function persist(){ try{ const o={}; for(const id in val) o[id]={q:val[id].q,p:val[id].p}; localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){} }
+tb.addEventListener("input",e=>{ const el=e.target; if(!el.dataset.id) return; val[el.dataset.id][el.dataset.k]=el.value; persist(); calc(); });
+document.getElementById("imp").oninput=calc; document.getElementById("iva").onchange=calc;
+document.getElementById("reset").onclick=()=>{ for(const id in val){ val[id].q=val[id].q0; val[id].p=val[id].p0; }
+  tb.querySelectorAll("input").forEach(i=>i.value=val[i.dataset.id][i.dataset.k]); persist(); calc(); };
+calc();
+</script>
+</body>
+</html>
