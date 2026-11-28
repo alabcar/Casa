@@ -960,27 +960,24 @@ function build(){
     discY(solid,4.8,H-0.006,-1.3,0.22,K("#fffbe9","#efede9"),-1);
   }
 
-  /* ---------- ANEXO DEL PATIO (fotos): una sola entrada bajo arco → lavadero pequeño → baño al fondo ---------- */
+  /* ---------- ANEXO DEL PATIO (fotos + plano): arco → lavadero (sur) → paso → baño (norte), tabique este-oeste ---------- */
   {
-    const XA=9.58, XE=13.1, ZA=-2.65, ZB=-0.04, XP=11.35;
-    const ALU=K("#f4f4f1","#e6e3de"), FROST=K("#dfe6e8","#e2e0db"), TILEB=K("#c9a06c","#c9c4bb");
-    // muro oeste (al patio): una ventana honda con jambas de ladrillo visto
-    const wO=op(0.75,1.75,1.0,2.1), zw0=ZA+wO.d0, zw1=ZA+wO.d1;
+    const XA=9.58, XE=13.1, ZA=-2.65, ZB=-0.04, ZP=-1.55;
+    const ALU=K("#f4f4f1","#e6e3de"), FROST=K("#dfe6e8","#e2e0db"), TILEB=K("#c9a06c","#c9c4bb"), WHT=K("#f6f5f1","#ebe9e4");
+    // muro oeste (al patio): ventana honda con jambas de ladrillo visto, sobre la pila del lavadero
+    const wO=op(1.2,2.2,1.0,2.1), zw0=ZA+wO.d0, zw1=ZA+wO.d1;
     wallOps(XA,ZA,XA,ZB,PT,[wO],H); frameOp(XA+0.03,ZA,XA+0.03,ZB,wO,ALU,true);
     { const g=(a,b,c,dd)=>tface("g","brick",XA,ZA,XA,ZB,[-1,0],PT/2+0.008,a,b,c,dd,0.5,0.5);
       g(wO.d0-0.2,wO.d0,wO.s-0.1,wO.h+0.2); g(wO.d1,wO.d1+0.2,wO.s-0.1,wO.h+0.2); g(wO.d0,wO.d1,wO.h,wO.h+0.2);
-      // derrames de ladrillo dentro del hueco y alféizar
       tface("g","brick",XA-PT/2,zw0,XA+PT/2,zw0,[0,1],0.004,0,PT,wO.s,wO.h,0.5,0.5);
       tface("g","brick",XA-PT/2,zw1,XA+PT/2,zw1,[0,-1],0.004,0,PT,wO.s,wO.h,0.5,0.5);
       solid.box(XA-PT/2-0.06,XA+PT/2,wO.s-0.06,wO.s,zw0-0.05,zw1+0.05,K("#b06a4a","#c9c4bb"));
-      // grifo de jardín bajo la ventana
-      solid.box(XA-PT/2-0.05,XA-PT/2,0.55,0.62,-0.62,-0.56,CHROME); solid.box(XA-PT/2-0.08,XA-PT/2-0.04,0.5,0.6,-0.6,-0.58,CHROME); }
-    // muro sur (al porche): el único acceso, un arco con puerta de aluminio blanco y vidrio mate
+      solid.box(XA-PT/2-0.05,XA-PT/2,0.55,0.62,-0.3,-0.24,CHROME); solid.box(XA-PT/2-0.08,XA-PT/2-0.04,0.5,0.6,-0.28,-0.26,CHROME); }
+    // muro sur (al porche): único acceso, arco con puerta de aluminio blanco y vidrio mate
     const AX0=9.95, AX1=10.95;
     wallOps(XA,ZB,XE,ZB,PT,[op(AX0-XA,AX1-XA,0,2.5)],H);
     { const c=(AX0+AX1)/2, r=(AX1-AX0)/2; for(let i=0;i<10;i++){ const x0=AX0+i*0.1, x1=x0+0.1, xmm=(x0+x1)/2, y=2.0+Math.sqrt(Math.max(0,r*r-(xmm-c)*(xmm-c))); solid.box(x0,x1,y,2.5,ZB-PT/2,ZB+PT/2,C.wall,C.wall); } }
     { const svc=solid.coll; solid.coll=null;
-      // cerco de aluminio dentro del arco (cara interior) y hoja abierta hacia dentro, bisagra en la jamba este
       const zi=ZB-PT/2-0.02; solid.box(AX0,AX0+0.05,0,2.02,zi-0.04,zi,ALU); solid.box(AX1-0.05,AX1,0,2.02,zi-0.04,zi,ALU); solid.box(AX0,AX1,1.97,2.02,zi-0.04,zi,ALU);
       const Hd=hingeDir(XA,ZB,XE,ZB,AX1-0.05-XA,PT+0.08,-1,1.25,-1), w=0.88, hh=1.96, P=s=>[Hd.hx+Hd.dx*s,Hd.hz+Hd.dz*s];
       const bar=(s0,s1,a,b2)=>{ const p0=P(s0),p1=P(s1); solid.wall(p0[0],p0[1],p1[0],p1[1],0.04,a,b2,ALU,ALU); };
@@ -990,49 +987,48 @@ function build(){
       const hp=P(w-0.05); solid.box(hp[0]-0.02,hp[0]+0.02,0.98,1.02,hp[1]-0.06,hp[1]+0.06,CHROME);
       solid.coll=svc; solid.coll.push({P:[[Hd.hx-0.03,Hd.hz-0.03],[P(w)[0]+0.03,Hd.hz-0.03],[P(w)[0]+0.03,P(w)[1]+0.03],[Hd.hx-0.03,P(w)[1]+0.03]],h0:0,h1:2});
     }
-    // tabique entre lavadero y baño, con el paso al baño
-    const DZ0=-1.75, DZ1=-1.0;
-    wallOps(XP,ZA,XP,ZB,0.1,[op(DZ0-ZA,DZ1-ZA,0,2.05)],H);
-    casing(solid,XP,ZA,XP,ZB,DZ0-ZA,DZ1-ZA,2.05,0.1,DC.white);
-    // suelos de baldosa beige (lavadero y baño)
+    // tabique este-oeste entre lavadero y baño, con un paso sin hoja justo enfrente del arco
+    const DX0=10.35, DX1=11.15;
+    wallOps(XA,ZP,XE,ZP,0.1,[op(DX0-XA,DX1-XA,0,2.05)],H);
+    casing(solid,XA,ZP,XE,ZP,DX0-XA,DX1-XA,2.05,0.1,DC.white);
     tfloor("g","floorBeige",[[XA+PT/2,ZA+0.125],[XE-0.125,ZA+0.125],[XE-0.125,ZB-PT/2],[XA+PT/2,ZB-PT/2]],0.003,0.8);
-    // lavadero: pila de obra sobre patas, lavadora debajo, balda y luz de techo
-    const lz0=ZA+0.125, lz1=-2.0;
-    solid.box(9.68,11.28,0.82,0.88,lz0,lz1,K("#f2f0ea","#ebe9e4"));
-    [9.7,10.48,11.22].forEach(x=>solid.box(x-0.03,x+0.03,0,0.82,lz0+0.02,lz1-0.02,K("#f4f2ed","#ebe9e4")));
-    solid.box(10.62,11.2,0.6,0.885,lz0+0.04,lz1-0.03,K("#f7f6f2","#ebe9e4")); solid.box(10.67,11.15,0.88,0.89,lz0+0.08,lz1-0.07,K("#c9cdcf","#d6d2cb"));
-    solid.beam([10.9,1.2,lz0+0.01],[10.9,1.2,lz0+0.2],0.03,0.03,CHROME); solid.beam([10.9,1.2,lz0+0.2],[10.9,1.08,lz0+0.24],0.025,0.025,CHROME);
-    solid.box(9.78,10.38,0,0.8,lz0+0.02,lz1-0.04,K("#fafafa","#efede9"));
-    { const sz=lz1-0.039; for(let a2=0;a2<12;a2++){ const a0=2*Math.PI*a2/12, a1=2*Math.PI*(a2+1)/12; solid.quad([10.08,0.45,sz],[10.08+0.2*Math.cos(a0),0.45+0.2*Math.sin(a0),sz],[10.08+0.2*Math.cos(a1),0.45+0.2*Math.sin(a1),sz],[10.08+0.2*Math.cos(a1),0.45+0.2*Math.sin(a1),sz],K("#3d4246","#bdb8b0"),[10.08,0.45,sz+1]); } }
-    furn.box(9.7,10.6,1.55,1.575,lz0,lz0+0.28,K("#d7d2c8","#e0ddd7")); [[9.78,0.2],[10.2,0.18]].forEach(([x,w2])=>furn.box(x,x+w2,1.575,1.78,lz0+0.03,lz0+0.24,K("#c9b48a","#d6d2cb")));
-    discY(solid,10.45,H-0.006,-1.3,0.09,K("#fffbe9","#efede9"),-1);
-    // baño del patio (fotos): alicatado crema hasta el techo con cenefa, inodoro, cajonera, lavabo suspendido con espejo y ducha
-    const bx0=XP+0.05, bx1=XE-0.125, bz0=ZA+0.125, bz1=ZB-PT/2;
+    const bx0=XA+PT/2+0.005, bx1=XE-0.125-0.005, bz0=ZA+0.125+0.005, bz1=ZP-0.05;
+    // ---- lavadero (sur): pila de obra pegada al muro oeste, bajo la ventana, con la lavadora debajo ----
+    solid.box(9.66,10.26,0.82,0.88,-1.45,-0.45,K("#f2f0ea","#ebe9e4"));
+    [-1.43,-0.95,-0.47].forEach(z=>solid.box(10.2,10.26,0,0.82,z-0.03,z+0.03,K("#f4f2ed","#ebe9e4")));
+    solid.box(9.66,9.72,0,0.82,-1.45,-0.45,K("#f4f2ed","#ebe9e4"));
+    solid.box(9.7,10.23,0.6,0.885,-1.42,-0.98,K("#f7f6f2","#ebe9e4")); solid.box(9.74,10.2,0.88,0.89,-1.38,-1.02,K("#c9cdcf","#d6d2cb"));
+    solid.beam([9.68,1.2,-1.2],[9.9,1.2,-1.2],0.03,0.03,CHROME); solid.beam([9.9,1.2,-1.2],[10.0,1.1,-1.2],0.025,0.025,CHROME);
+    solid.box(9.7,10.18,0,0.8,-0.92,-0.5,K("#fafafa","#efede9"));
+    { const sx=10.181; for(let a2=0;a2<12;a2++){ const a0=2*Math.PI*a2/12, a1=2*Math.PI*(a2+1)/12; solid.quad([sx,0.4,-0.71],[sx,0.4+0.16*Math.sin(a0),-0.71+0.16*Math.cos(a0)],[sx,0.4+0.16*Math.sin(a1),-0.71+0.16*Math.cos(a1)],[sx,0.4+0.16*Math.sin(a1),-0.71+0.16*Math.cos(a1)],K("#3d4246","#bdb8b0"),[sx+1,0.4,-0.71]); } }
+    furn.box(9.66,9.94,1.55,1.575,-1.4,-0.6,K("#d7d2c8","#e0ddd7")); [[-1.3,0.18],[-1.0,0.16]].forEach(([z,w2])=>furn.box(9.7,9.9,1.575,1.78,z,z+w2,K("#c9b48a","#d6d2cb")));
+    discY(solid,11.1,H-0.006,-0.85,0.09,K("#fffbe9","#efede9"),-1);
+    // ---- baño (norte): alicatado crema hasta el techo con cenefa; inodoro, cajonera y lavabo en el muro del fondo; ducha al este ----
     tface("g","beige",bx0,bz0,bx1,bz0,[0,1],0.006,0,bx1-bx0,0,H,0.5,0.5);
+    tface("g","beige",bx0,bz0,bx0,bz1,[1,0],0.006,0,bz1-bz0,0,H,0.5,0.5);
     tface("g","beige",bx1,bz0,bx1,bz1,[-1,0],0.006,0,bz1-bz0,0,H,0.5,0.5);
-    tface("g","beige",bx0,bz1,bx1,bz1,[0,-1],0.006,0,bx1-bx0,0,H,0.5,0.5);
-    tskin("g","beige",bx0,bz0,bx0,bz1,[1,0],0.006,[op(DZ0-bz0,DZ1-bz0,0,2.05)],0,H,0.5,0.5);
-    [[bx0,bz0,bx1,bz0,[0,1]],[bx1,bz0,bx1,bz1,[-1,0]],[bx0,bz1,bx1,bz1,[0,-1]]].forEach(([a,b2,c,dd,n])=>lineQuad(solid,a,b2,c,dd,n,0.009,0,Math.hypot(c-a,dd-b2),1.3,1.36,TILEB));
-    lineQuad(solid,bx0,bz0,bx0,bz1,[1,0],0.009,0,DZ0-bz0-0.1,1.3,1.36,TILEB); lineQuad(solid,bx0,bz0,bx0,bz1,[1,0],0.009,DZ1-bz0+0.1,bz1-bz0,1.3,1.36,TILEB);
-    // inodoro con cisterna (pared del fondo, a la izquierda al entrar)
-    solid.box(bx1-0.2,bx1,0.4,0.82,-2.4,-2.0,PORC); solid.box(bx1-0.21,bx1,0.82,0.85,-2.41,-1.99,PORC);
-    solid.box(bx1-0.62,bx1-0.2,0,0.4,-2.36,-2.04,PORC); solid.box(bx1-0.64,bx1-0.2,0.4,0.44,-2.38,-2.02,PORC);
-    // cajonera blanca
-    solid.box(bx1-0.36,bx1-0.02,0,0.86,-1.88,-1.52,K("#f6f5f1","#ebe9e4"));
-    [0.22,0.43,0.64].forEach(y=>solid.box(bx1-0.365,bx1-0.36,y,y+0.006,-1.86,-1.54,K("#cfcbc3")));
-    [0.12,0.33,0.54,0.75].forEach(y=>solid.box(bx1-0.38,bx1-0.36,y-0.015,y+0.015,-1.715,-1.685,CHROME));
-    // lavabo suspendido con encimera, sifón cromado, espejo y luces
-    solid.box(bx1-0.48,bx1,0.8,0.85,-1.42,-0.72,K("#ece9e2","#e6e3de")); cyl(solid,bx1-0.24,-1.07,0.62,0.8,0.2,PORC,14);
-    cyl(solid,bx1-0.1,-1.07,0.3,0.62,0.025,CHROME,8);
-    solid.beam([bx1-0.06,0.85,-1.12],[bx1-0.06,1.0,-1.12],0.025,0.025,CHROME); solid.beam([bx1-0.06,1.0,-1.12],[bx1-0.2,0.98,-1.12],0.02,0.02,CHROME);
-    solid.box(bx1-0.012,bx1,1.05,1.95,-1.4,-0.74,K("#fbfbf9")); solid.quad([bx1-0.014,1.08,-1.37],[bx1-0.014,1.08,-0.77],[bx1-0.014,1.92,-0.77],[bx1-0.014,1.92,-1.37],K("#bfd0d6","#d8dcdd"),[bx1-5,1.5,-1.07]);
-    solid.beam([bx1-0.01,1.5,-1.75],[bx1-0.01,1.5,-1.55],0.02,0.02,BRASS);
-    [[12.0,-1.3],[12.5,-1.3]].forEach(([x,z])=>discY(solid,x,H-0.006,z,0.06,K("#fffbe9","#efede9"),-1));
-    // ducha a la derecha al entrar, con mampara
-    solid.box(12.05,bx1,0,0.05,-0.8,bz1,PORC);
-    glass.quad([12.45,0.05,-0.8],[bx1,0.05,-0.8],[bx1,2.0,-0.8],[12.45,2.0,-0.8],hex("#d8e8ee"),[12.6,1,0]);
-    solid.box(12.44,12.46,0.05,2.0,-0.81,-0.79,CHROME); solid.box(bx1-0.02,bx1,1.0,2.1,-0.5,-0.47,CHROME); discY(solid,bx1-0.12,2.1,-0.48,0.09,CHROME,-1);
-    solid.coll.push({P:[[12.43,-0.82],[bx1,-0.82],[bx1,-0.78],[12.43,-0.78]],h0:0,h1:2.0,glass:true});
+    tskin("g","beige",bx0,ZP,bx1,ZP,[0,-1],0.056,[op(DX0-bx0,DX1-bx0,0,2.05)],0,H,0.5,0.5);
+    lineQuad(solid,bx0,bz0,bx1,bz0,[0,1],0.009,0,bx1-bx0,1.3,1.36,TILEB);
+    lineQuad(solid,bx0,bz0,bx0,bz1,[1,0],0.009,0,bz1-bz0,1.3,1.36,TILEB); lineQuad(solid,bx1,bz0,bx1,bz1,[-1,0],0.009,0,bz1-bz0,1.3,1.36,TILEB);
+    lineQuad(solid,bx0,ZP,bx1,ZP,[0,-1],0.059,0,DX0-bx0-0.08,1.3,1.36,TILEB); lineQuad(solid,bx0,ZP,bx1,ZP,[0,-1],0.059,DX1-bx0+0.08,bx1-bx0,1.3,1.36,TILEB);
+    // inodoro de pie contra el muro norte, mirando al sur
+    solid.box(9.86,10.24,0.4,0.82,bz0,bz0+0.2,PORC); solid.box(9.87,10.23,0,0.4,bz0+0.2,bz0+0.62,PORC); solid.box(9.86,10.24,0.4,0.44,bz0+0.2,bz0+0.66,PORC);
+    // cajonera blanca (cuatro cajones con pomo)
+    solid.box(10.45,10.81,0,0.86,bz0,bz0+0.36,WHT);
+    [0.21,0.42,0.63].forEach(y=>solid.box(10.46,10.8,y,y+0.006,bz0+0.36,bz0+0.365,K("#cfcbc3")));
+    [0.11,0.32,0.53,0.74].forEach(y=>solid.box(10.615,10.645,y-0.015,y+0.015,bz0+0.365,bz0+0.395,CHROME));
+    // lavabo con encimera de mármol, sifón cromado, espejo y luces
+    solid.box(10.95,11.95,0.8,0.85,bz0,bz0+0.45,K("#ece9e2","#e6e3de")); cyl(solid,11.45,bz0+0.22,0.62,0.8,0.2,PORC,14); cyl(solid,11.45,bz0+0.06,0.3,0.62,0.025,CHROME,8);
+    solid.beam([11.45,0.85,bz0+0.05],[11.45,1.0,bz0+0.05],0.025,0.025,CHROME); solid.beam([11.45,1.0,bz0+0.05],[11.45,0.98,bz0+0.2],0.02,0.02,CHROME);
+    solid.box(10.98,11.92,1.05,1.95,bz0,bz0+0.012,WHT); solid.quad([11.0,1.08,bz0+0.014],[11.9,1.08,bz0+0.014],[11.9,1.92,bz0+0.014],[11.0,1.92,bz0+0.014],K("#bfd0d6","#d8dcdd"),[11.45,1.5,bz0+3]);
+    solid.beam([10.99,1.5,bz0+0.02],[11.91,1.5,bz0+0.02],0.012,0.012,BRASS);
+    [[10.3,-1.95],[11.5,-1.95]].forEach(([x,z])=>discY(solid,x,H-0.006,z,0.06,K("#fffbe9","#efede9"),-1));
+    // ducha al este, con mampara de vidrio
+    solid.box(12.3,bx1,0,0.05,bz0,bz1-0.01,PORC);
+    glass.quad([12.3,0.05,bz0],[12.3,0.05,bz1-0.01],[12.3,2.0,bz1-0.01],[12.3,2.0,bz0],hex("#d8e8ee"),[11.3,1,-2]);
+    solid.box(12.29,12.31,0.05,2.0,bz1-0.02,bz1,CHROME); solid.box(12.29,12.31,1.98,2.02,bz0,bz1,CHROME);
+    solid.box(bx1-0.02,bx1,1.0,2.1,bz0+0.35,bz0+0.38,CHROME); discY(solid,bx1-0.12,2.1,bz0+0.365,0.09,CHROME,-1);
+    solid.coll.push({P:[[12.28,bz0],[12.32,bz0],[12.32,bz1],[12.28,bz1]],h0:0,h1:2.0,glass:true});
   }
 
   /* ---------- PATIO: barro rosado con verdín, arriate con el árbol, poyos escalonados, pilar de ladrillo visto ---------- */
@@ -1569,8 +1565,8 @@ const VIEWS={
   bano2:   {mode:"look", eye:[2.55,1.6,-1.4], yaw:2.55, pitch:-0.12, fov:86, roof:true, upper:true},
   cocina:  {mode:"look", eye:[3.5,1.6,-0.5], yaw:-0.75, pitch:-0.12, fov:84, roof:true, upper:true},
   anexo:   {mode:"look", eye:[10.25,1.6,1.1], yaw:-1.45, pitch:-0.08, fov:84, roof:true, upper:true},
-  anexo2:  {mode:"look", eye:[10.0,1.6,-0.7], yaw:-0.42, pitch:-0.1, fov:86, roof:true, upper:true},
-  banoP:   {mode:"look", eye:[11.45,1.55,-1.38], yaw:0.08, pitch:-0.12, fov:88, roof:true, upper:true},
+  anexo2:  {mode:"look", eye:[10.45,1.6,-0.3], yaw:-1.5708, pitch:-0.12, fov:84, roof:true, upper:true},
+  banoP:   {mode:"look", eye:[10.75,1.55,-1.58], yaw:-1.5, pitch:-0.18, fov:96, roof:true, upper:true},
   bano3:   {mode:"look", eye:[2.72,1.6,-0.78], yaw:3.25, pitch:-0.05, fov:88, roof:true, upper:true}
 };
 function setView(name){
@@ -1750,8 +1746,8 @@ const PTS=[
   {id:"salon",n:"Salón ampliado",x:1.6,z:2.2,L:0,yaw:0},
   {id:"comedor",n:"Junto a la cristalera",x:5.6,z:3.1,L:0},
   {id:"cocina",n:"Cocina",x:4.6,z:-1.1,L:0,yaw:-1.2},
-  {id:"lavadero",n:"Lavadero",x:10.35,z:-0.75,L:0,yaw:-0.6},
-  {id:"banoPatio",n:"Baño del patio",x:11.8,z:-1.38,L:0,yaw:0},
+  {id:"lavadero",n:"Lavadero",x:10.45,z:-0.45,L:0,yaw:-1.5708},
+  {id:"banoPatio",n:"Baño del patio",x:10.75,z:-1.9,L:0,yaw:-0.9},
   {id:"patio",n:"Patio",x:7.8,z:2.2,L:0},
   {id:"porche",n:"Porche",x:10.2,z:3.9,L:0,yaw:3.3},
   {id:"arriba",n:"Llegada a la sala",x:-1.95,z:-2.15,L:1,yaw:3.14},
