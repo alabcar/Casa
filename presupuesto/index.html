@@ -92,7 +92,8 @@ const SRC={
   27:["Certicalia · honorarios del arquitecto habitualmente entre el 6 % y el 10 % del coste de la obra","https://www.certicalia.com/proyecto-reforma-vivienda/madrid"],
   28:["Ordenanza ICIO de La Vila Joiosa: tipo del 4 % (ejemplo valenciano; el de Foios hay que confirmarlo)","https://Villajoyosa.com/documentos/archivos/lavila_160220210.pdf"],
   29:["Habitissimo · poner suelo laminado: 20–65 €/m², media 30 €/m²","https://www.habitissimo.es/presupuestos/instalar-suelo-laminado"],
-  30:["Habitissimo · impermeabilizar: tejado de tejas ≈2.500 € por 100 m²","https://www.habitissimo.es/presupuestos/impermeabilizar-tejado"]
+  30:["Habitissimo · impermeabilizar: tejado de tejas ≈2.500 € por 100 m²","https://www.habitissimo.es/presupuestos/impermeabilizar-tejado"],
+  31:["Habitissimo · puertas de madera: batiente ≈250 €, lacada ≈350 €","https://www.habitissimo.es/presupuestos/puertas-madera"]
 };
 /* [id, fase ('1','2','o'), descripción, cantidad, unidad, precio, fuentes, nota, iva especial] — unidad '%PEM' = porcentaje sobre la obra de la fase 1 */
 const ROWS=[
@@ -126,14 +127,15 @@ const ROWS=[
  ["icio","1","ICIO y tasa de licencia de obra mayor (confirmar el tipo en el Ajuntament de Foios)",4,"%PEM",0,[28],"","0"],
  ["g","Fase 2 · cambra"],
  ["lam","2","Suelo laminado AC4 con base aislante (≈60 m²)",60,"m²",38,[29],""],
- ["tab","2","Tabiques y vidrios de distribución junto a las ventanas",1,"global",6000,[],"Estimación propia."],
+ ["tab","2","Tabiques hasta 2,60 m con vidrio fijo hasta el tejado: 2 dormitorios, despacho y baño (≈25 m de tabique)",1,"global",7500,[],"Estimación propia: pladur o ladrillo, más el vidrio y su perfil."],
+ ["puertas2","2","Puertas interiores de madera con cerco",4,"ud",350,[31],""],
  ["elec2","2","Electricidad e iluminación de la cambra",1,"global",2500,[15],""],
- ["banoc","2","Baño de la cambra: solo preinstalaciones de agua y desagüe",1,"global",2500,[],"Estimación propia."],
+ ["banoc","2","Baño de la cambra completo (≈4,5 m²): ducha de obra, inodoro suspendido y mueble, sobre el baño de abajo",1,"ud",6000,[9,10],"Algo menos que el de abajo por ser más pequeño."],
  ["g","Opcionales (no se suman al total)"],
  ["iny","o","Inyecciones contra la humedad por capilaridad, solo si la medición la confirma (≈30 m²)",30,"m²",100,[25],""],
  ["terr","o","Impermeabilización de la terraza (≈60 m²)",60,"m²",25,[30],"Sin cambiar el pavimento; con solado nuevo sube bastante."]
 ];
-const KEY="casa-foios-presupuesto-v2";
+const KEY="casa-foios-presupuesto-v3";
 let saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){}
 const tb=document.querySelector("#t tbody");
 const fmt=n=>n.toLocaleString("es-ES",{maximumFractionDigits:0})+" €";
