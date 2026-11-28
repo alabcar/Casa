@@ -127,6 +127,7 @@
       <label class="chk"><input type="checkbox" id="furn" checked> Mobiliario</label>
       <label class="chk"><input type="checkbox" id="hl"> Resaltar la obra nueva</label>
       <label class="chk"><input type="checkbox" id="bdoor"> Puerta del baño abierta</label>
+      <label class="chk"><input type="checkbox" id="ghost" checked> Atravesar muros, puertas y muebles</label>
       <label class="chk"><input type="checkbox" id="labels" checked> Nombres de estancias</label>
       <label class="chk"><input type="checkbox" id="clay"> Modo maqueta (sin texturas)</label>
     </div>
@@ -147,7 +148,7 @@ const H = 2.98;           // altura libre del salón
 const SLAB = 0.22;        // canto de forjado
 const X_OLD = 4.08, X_NEW = 6.60, Z_S = 5.12, TL = 0.52;
 const WT = 0.25;          // grueso de muro
-const state = { shadows:true, nav:"vista", frontOpen:false, floor:"madera", frame:"madera", roof:true, furn:true, hl:false, clay:false, view:"aerea", doorOpen:false, labels:true, upper:true, teja:true, env:true, cambra:"diafana" };
+const state = { shadows:true, nav:"vista", frontOpen:false, floor:"madera", frame:"madera", roof:true, furn:true, hl:false, clay:false, view:"aerea", doorOpen:false, labels:true, upper:true, teja:true, env:true, cambra:"diafana", ghost:true };
 const wxFull = z => z>=0 ? TL*(1-z/Z_S) : TL+(0.81-TL)*(z/-2.65);   // eje del muro oblicuo central
 const xL = z => -7.87-0.1166*(z+1.85);                                 // eje de la fachada principal (oeste)
 
@@ -1679,10 +1680,11 @@ document.querySelectorAll("#floors .chip").forEach(b=>b.onclick=()=>{state.floor
 document.querySelectorAll("#frames .chip").forEach(b=>b.onclick=()=>{state.frame=b.dataset.c;sync();rebuild();});
 document.getElementById("roof").onchange=e=>{state.roof=e.target.checked;draw();};
 document.getElementById("upper").onchange=e=>{state.upper=e.target.checked;draw();};
+document.getElementById("ghost").onchange=e=>{state.ghost=e.target.checked;};
 document.getElementById("teja").onchange=e=>{state.teja=e.target.checked;if(state.teja&&!state.upper){state.upper=true;syncChecks();}draw();};
 document.getElementById("env").onchange=e=>{state.env=e.target.checked;draw();};
 document.getElementById("shadows").onchange=e=>{state.shadows=e.target.checked;draw();};
-function syncChecks(){ ["roof","upper","teja","env","furn","hl","labels","clay","shadows"].forEach(k=>{ const el=document.getElementById(k); if(el) el.checked=!!state[k]; });
+function syncChecks(){ ["roof","upper","teja","env","furn","hl","labels","clay","shadows","ghost"].forEach(k=>{ const el=document.getElementById(k); if(el) el.checked=!!state[k]; });
   const b=document.getElementById("bdoor"); if(b) b.checked=!!state.doorOpen; }
 const panel=document.getElementById("panel"), tog=document.getElementById("tog"), small=window.matchMedia("(max-width:700px)");
 function setPanel(open){ panel.classList.toggle("closed",!open); tog.textContent=open?"✕":"☰"; tog.setAttribute("aria-label",open?"Ocultar opciones":"Mostrar opciones"); }
@@ -1712,6 +1714,7 @@ function segDist(x,z,a,b){ const dx=b[0]-a[0],dz=b[1]-a[1],L=dx*dx+dz*dz||1e-9; 
 function segX(p,q,a,b){ const d=(q[0]-p[0])*(b[1]-a[1])-(q[1]-p[1])*(b[0]-a[0]); if(Math.abs(d)<1e-12) return false;
   const t=((a[0]-p[0])*(b[1]-a[1])-(a[1]-p[1])*(b[0]-a[0]))/d, u=((a[0]-p[0])*(q[1]-p[1])-(a[1]-p[1])*(q[0]-p[0]))/d; return t>=0&&t<=1&&u>=0&&u<=1; }
 function hits(x,z,y){
+  if(state.ghost) return false;
   for(const q of COLL){ if(!activeQ(q)||q.h0>=y+1.5||q.h1<=y+0.25) continue;
     if(x<q.minx-RAD||x>q.maxx+RAD||z<q.minz-RAD||z>q.maxz+RAD) continue;
     if(inQuad(q.P,x,z)) return true;
