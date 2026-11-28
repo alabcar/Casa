@@ -7,99 +7,168 @@
 <title>Presupuesto · Casa de Foios</title>
 <link rel="stylesheet" href="../assets.css">
 <style>
- input[type=number]{width:96px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font:inherit;text-align:right;background:#fff}
+ input[type=number]{width:88px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font:inherit;text-align:right;background:#fff}
  td.r,th.r{text-align:right;white-space:nowrap}
+ td.src{font-size:12px;white-space:nowrap}
+ td.src a{text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-right:2px;background:#fff}
  tr.grp td{background:#f1ece1;font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
- .tot{margin-top:16px;max-width:380px;margin-left:auto}
- .tot div{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line)}
- .tot .big{font-size:20px;font-weight:700;border-bottom:0}
+ tr.opt td:first-child{color:var(--muted)}
+ small.n{display:block;color:var(--muted);font-size:12.5px;line-height:1.35;margin-top:2px}
+ .tot{margin-top:16px;max-width:460px;margin-left:auto}
+ .tot div{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--line)}
+ .tot .big{font-size:19px;font-weight:700;border-bottom:0}
+ .tot .muted{color:var(--muted)}
  button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 14px;cursor:pointer}
  .wrap{overflow-x:auto}
  label.f{display:inline-flex;gap:6px;align-items:center;margin-right:16px;font-size:15px}
+ ol.src{font-size:13.5px;color:var(--muted);padding-left:1.4em}
+ ol.src li{margin:.3em 0}
 </style>
 </head>
 <body>
 <header class="top"><nav><b>Casa de Foios</b><a href="../">Proyecto</a><a href="../maqueta/">Maqueta 3D</a><a href="./">Presupuesto</a><a href="../calculadora/">Calculadora</a></nav></header>
 <main>
 <h1>Presupuesto de la reforma</h1>
-<p class="lead">Partidas con mediciones sacadas de los planos y precios <b>orientativos</b> míos, sin ningún presupuesto real detrás. Cambia cantidades y precios y el total se recalcula. Se guardan solo en este navegador.</p>
-<p class="note">Sirve para ordenar ideas y comparar fases, no para decidir. Hay que sustituir los precios por los de presupuestos de empresas de Foios o Valencia. Las partidas 3 y 5 dependen de un técnico.</p>
+<p class="lead">Precios de ejemplo tomados de guías de precios de 2026 (Habitissimo, Cronoshare, el generador de precios de CYPE y otras), con preferencia por los datos de Valencia cuando existen. Las mediciones salen de los planos y son aproximadas. Puedes cambiar cantidades y precios y el total se recalcula; los cambios se guardan solo en este navegador.</p>
+<p class="note">Es una referencia para ordenar ideas, no un presupuesto de empresa. Los números de la columna «Fuente» llevan a la referencia de cada precio. Cuando la fuente da un rango, he elegido un valor medio o medio-alto por tratarse de una casa antigua. Las partidas marcadas como estimación propia no tienen una fuente directa.</p>
 
 <p>
-  <label class="f">IVA <select id="iva"><option value="0.10">10 % (reforma de vivienda)</option><option value="0.21">21 %</option><option value="0">Sin IVA</option></select></label>
+  <label class="f">IVA de la obra <select id="iva"><option value="0.10">10 % (reforma de vivienda)</option><option value="0.21">21 %</option></select></label>
   <label class="f">Imprevistos <input type="number" id="imp" value="10" min="0" max="40" step="1" style="width:64px"> %</label>
   <button id="reset">Restaurar valores iniciales</button>
 </p>
 
 <div class="wrap"><table id="t">
-<thead><tr><th>Partida</th><th class="r">Cantidad</th><th>Ud.</th><th class="r">Precio ud. (€)</th><th class="r">Importe (€)</th></tr></thead>
+<thead><tr><th>Partida</th><th class="r">Cantidad</th><th>Ud.</th><th class="r">Precio (€)</th><th class="r">Importe (€)</th><th>Fuente</th></tr></thead>
 <tbody></tbody></table></div>
 
 <div class="tot">
-  <div><span>Subtotal fase 1</span><b id="s1">–</b></div>
-  <div><span>Subtotal fase 2 (cambra)</span><b id="s2">–</b></div>
-  <div><span>Imprevistos</span><b id="simp">–</b></div>
-  <div><span>IVA</span><b id="siva">–</b></div>
+  <div><span>Obra fase 1 (ejecución material)</span><b id="pem1">–</b></div>
+  <div><span>Imprevistos sobre la obra</span><b id="simp">–</b></div>
+  <div><span>Proyecto, dirección y licencia</span><b id="stec">–</b></div>
+  <div><span>IVA</span><b id="siva1">–</b></div>
   <div class="big"><span>Total fase 1</span><span id="t1">–</span></div>
-  <div class="big"><span>Total con fase 2</span><span id="t2">–</span></div>
+  <div><span>Fase 2 · cambra (con imprevistos e IVA)</span><b id="t2p">–</b></div>
+  <div class="big"><span>Total con la cambra</span><span id="t2">–</span></div>
+  <div class="muted"><span>Opcionales (con imprevistos e IVA, no sumados)</span><b id="to">–</b></div>
 </div>
+
+<h2>Fuentes de los precios</h2>
+<ol class="src" id="srcs"></ol>
+<p class="note">El IVA reducido del 10 % se aplica a obras de renovación de vivienda cuando el cliente es un particular y los materiales que aporta el contratista no superan el 40 % de la base; si no se cumple, es el 21 %. Los honorarios técnicos llevan siempre el 21 % y el ICIO es un impuesto municipal sin IVA. El tipo del ICIO de Foios no lo he encontrado publicado: he puesto un 4 %, que es habitual en municipios valencianos, pero hay que confirmarlo en el Ajuntament.</p>
 
 <footer><a href="../">← Volver al proyecto</a></footer>
 </main>
 
 <script>
 "use strict";
-/* [id, fase, grupo, descripción, cantidad, unidad, precio] */
+const SRC={
+  1:["Generador de precios CYPE · demolición de partición interior (8,75 €/m², solo la demolición)","https://generadordeprecios.info/rehabilitacion/Demoliciones/Particiones/Tabiques/DPT010_Demolicion_de_particion_interior_de.html"],
+  2:["Habitissimo · cerramientos de cristal: en Valencia, 160–300 €/m²","https://www.habitissimo.es/presupuestos/cerramiento-cristal"],
+  3:["Habitissimo · carpintería de aluminio: con rotura de puente térmico, más de 270 €/m²","https://habitissimo.es/presupuestos/carpinteria-aluminio"],
+  4:["Generador de precios CYPE · losa maciza de hormigón armado (≈109 €/m², sin impermeabilizar ni acabar)","https://generadordeprecios.info/obra_nueva/Estructuras/Hormigon_armado/Losas_macizas/Losa_maciza.html"],
+  5:["Habitissimo · rehabilitar patios: cerrar un patio ≈150 €/m²","https://www.habitissimo.es/presupuestos/rehabilitar-patios"],
+  6:["Cronoshare · solera de hormigón 19–40 €/m², más base de zahorra y lámina","https://www.cronoshare.com/cuanto-cuesta/poner-solera-hormigon"],
+  7:["Habitissimo · suelo porcelánico imitación madera colocado 35–40 €/m²; retirar el antiguo, 2–3 €/m² más","https://www.habitissimo.es/presupuestos/suelo-porcelanico"],
+  8:["Habitissimo · cambiar ventanas: PVC 250–450 € (120×120); oscilobatientes desde 350 €","https://www.habitissimo.es/presupuestos/cambiar-ventanas"],
+  9:["Habitissimo · reformar baño: ≈650 €/m² de media (baño de 5,4 m² ≈ 3.500 €)","https://www.habitissimo.es/presupuestos/reformar-bano"],
+  10:["El Español (Guía Habitissimo 2025) · un baño de calidades medias-altas supera los 7.000 €","https://www.elespanol.com/mujer/interiorismo/20260514/expertos-coinciden-reformar-bano-costaba-euros-ahora-supera-espana/1003744232504_0.amp.html"],
+  11:["Cronoshare · tubo solar instalado 400–700 €; CYPE, tubo solar VELUX para cubierta plana 782,53 €","https://www.cronoshare.com/cuanto-cuesta/instalar-tubo-solar"],
+  12:["Habitissimo · puertas a medida 400–2.000 €","https://www.habitissimo.es/presupuestos/hacer-puertas-a-medida"],
+  13:["Habitissimo · reforma integral de cocina ≈850 €/m² (10 m² ≈ 8.100 €)","https://www.habitissimo.es/presupuestos/reforma-integral-cocina"],
+  14:["Cronoshare · reforma integral de cocina en Torrent: media 9.732 € (7.486–12.652 €)","https://www.cronoshare.com/servicios/presupuesto-reforma-integral-cocina/valencia/torrent"],
+  15:["Habitissimo · cambiar la instalación eléctrica: 3.500–4.000 € para unos 100 m²","https://www.habitissimo.es/presupuestos/reformar-instalacion-electrica-vivienda-o-local"],
+  16:["El Español · renovar cuadro, cableado y tomas en 70–100 m²: 3.600–6.500 €","https://www.elespanol.com/mujer/interiorismo/20260719/electricista-reformar-casa-cambiar-instalacion-electrica-costaba-eur-ahora-supera/1003744319172_0.html"],
+  17:["Habitissimo · tejados: dos aguas con teja curva ≈90 €/m²","https://www.habitissimo.es/presupuestos/tejados"],
+  18:["Cronoshare · arreglar un tejado: 50–100 €/m² de media","https://www.cronoshare.com/cuanto-cuesta/arreglar-tejado"],
+  19:["Leroy Merlin · balconera de PVC imitación roble 140×229 con vidrio bajo emisivo: 885 € (sin colocar)","https://www.leroymerlin.es/productos/balconera-pvc-140x229cm-oscilobatiente-roble-isoxa-doble-acristalamiento-transparente-4-16-4-bajo-emisivo-con-persiana-83616231.html"],
+  20:["Habitissimo · reparar ventanas de madera: restaurar 15 ventanas antiguas ≈2.300 €","https://www.habitissimo.es/presupuestos/reparar-ventanas-madera"],
+  21:["Habitissimo · ventanas de doble cristal: cambiar un cristal simple por doble ≈100 € (120×120)","https://www.habitissimo.es/presupuestos/ventanas-doble-cristal"],
+  22:["Cronoshare · rehabilitar fachada: en Valencia, mortero y pintura 20–32 €/m²","https://www.cronoshare.com/cuanto-cuesta/rehabilitar-fachada-edificio"],
+  23:["Habitissimo · fachada de casa unifamiliar 20–200 €/m² según estado","https://www.habitissimo.es/presupuestos/rehabilitar-fachada-casa-unifamiliar"],
+  24:["Idealista · salitre: retirar y volver a revestir 30–60 €/m²","https://www.idealista.com/news/node/885154"],
+  25:["Habitissimo · humedades por capilaridad: inyecciones ≈1.000 € por 10 m²","https://www.habitissimo.es/presupuestos/humedades-capilaridad"],
+  26:["Habitissimo · reformar patio: 3.000–7.000 €; rehabilitar pavimentos de patio ≈30 €/m²","https://www.habitissimo.es/presupuestos/reformar-patio"],
+  27:["Certicalia · honorarios del arquitecto habitualmente entre el 6 % y el 10 % del coste de la obra","https://www.certicalia.com/proyecto-reforma-vivienda/madrid"],
+  28:["Ordenanza ICIO de La Vila Joiosa: tipo del 4 % (ejemplo valenciano; el de Foios hay que confirmarlo)","https://Villajoyosa.com/documentos/archivos/lavila_160220210.pdf"],
+  29:["Habitissimo · poner suelo laminado: 20–65 €/m², media 30 €/m²","https://www.habitissimo.es/presupuestos/instalar-suelo-laminado"],
+  30:["Habitissimo · impermeabilizar: tejado de tejas ≈2.500 € por 100 m²","https://www.habitissimo.es/presupuestos/impermeabilizar-tejado"]
+};
+/* [id, fase ('1','2','o'), descripción, cantidad, unidad, precio, fuentes, nota, iva especial] — unidad '%PEM' = porcentaje sobre la obra de la fase 1 */
 const ROWS=[
- ["g","1","Obra del salón ampliado"],
- ["demol","1","","1. Demolición del tabique y gestión de escombros",1,"global",1800],
- ["cerr","1","","2. Cerramiento acristalado al patio (≈5,1 × 2,98 m, vidrio bajo emisivo)",15.2,"m²",750],
- ["viga","1","","3. Viga y forjado que cierran el hueco de la terraza (≈6,4 m²) + estudio estructural",1,"global",4800],
- ["suelo","1","","4. Excavación, aislamiento, solera y suelo único del salón (≈32 m²)",32,"m²",95],
- ["conex","1","","5. Ventana interior de conexión cocina–salón (≈1,5 m)",1,"ud",900],
- ["inst","1","","6. Electricidad e iluminación del salón y cocina; climatización",1,"global",3800],
- ["g","1","Baño"],
- ["bano","1","","7. Baño reformado completo (5,2 m²: ducha, sanitarios, mueble, azulejo, suelo hidráulico, extractor)",1,"global",8200],
- ["puerta","1","","8. Puerta de madera 0,80 m con montante de vidrio",1,"ud",900],
- ["g","1","Envolvente"],
- ["cub","1","","9. Cubierta: levantar, impermeabilizar, aislar y recolocar las tejas árabes (superficie por medir)",90,"m²",130],
- ["vent_n","1","","10. Ventanas nuevas de PVC o aluminio para sustituir las de aluminio",6,"ud",750],
- ["vent_r","1","","11. Restauración de ventanas y puertas de madera (pino) con vidrio aislante",8,"ud",520],
- ["fach","1","","12. Reparación de la fachada principal y de la lateral",1,"global",7500],
- ["hum","1","","13. Ladrillo visto 1 m con cal transpirable y tratamiento de humedades",45,"m²",70],
- ["porche","1","","14. Porche y laterales: reparación de zócalos y desconchados",1,"global",1800],
- ["g","1","Técnicos y licencias"],
- ["proy","1","","15. Proyecto y dirección de obra (arquitecto / aparejador)",1,"global",5500],
- ["lic","1","","16. Licencia de obra mayor y tasas",1,"global",1800],
- ["g","2","Fase 2 · cambra"],
- ["camb","2","","17. Suelo laminado con base aislante",40,"m²",38],
- ["cambp","2","","18. Tabiques y vidrios de distribución junto a las ventanas",1,"global",6000],
- ["cambb","2","","19. Baño de la cambra: solo preinstalaciones",1,"global",2800]
+ ["g","Obra del salón ampliado"],
+ ["demol","1","Demolición del tabique y retirada de la cristalera actual, con desescombro",15.3,"m²",30,[1],"CYPE da 8,75 €/m² solo por demoler; añado carga, contenedor y retirada de carpintería."],
+ ["cerr","1","Cerramiento acristalado al patio: puerta de dos hojas y dos fijos, vidrio bajo emisivo, aluminio con rotura de puente térmico o madera",15.2,"m²",450,[2,3],"Valor alto del rango por ser de suelo a techo, con puerta y vidrio bajo emisivo."],
+ ["losa","1","Losa que cierra el hueco de la terraza, impermeabilizada y acabada (≈6,4 m²)",6.4,"m²",260,[4,5],"Losa más impermeabilización, pavimento de terraza y techo del salón."],
+ ["viga","1","Jácena sobre el cerramiento y apeos provisionales",1,"global",1800,[4],"Estimación propia a partir de CYPE; la define el cálculo estructural."],
+ ["suelo1","1","Retirada del suelo actual y nivelado del salón (≈32 m²)",32,"m²",12,[7],""],
+ ["solera","1","Solera nueva en la franja del patio: excavación, encachado, lámina, aislamiento y hormigón (≈13 m²)",13,"m²",65,[6],""],
+ ["porc","1","Suelo porcelánico efecto madera colocado, con rodapié (≈32 m²)",32,"m²",40,[7],""],
+ ["conex","1","Ventana interior entre la cocina y el salón (≈1,5 m²), con apertura del hueco",1,"ud",900,[8],""],
+ ["g","Baño"],
+ ["bano","1","Baño completo (5,2 m²): ducha de obra, zellige, suelo hidráulico, sanitarios suspendidos, mueble de roble, grifería de latón y extractor",1,"ud",7500,[9,10],"Calidad media-alta."],
+ ["tubo","1","Tubo solar desde la terraza hasta el techo del baño",1,"ud",800,[11],""],
+ ["puertab","1","Puerta de madera a medida (0,80 m) con montante de vidrio",1,"ud",700,[12],""],
+ ["g","Cocina"],
+ ["cocina","1","Cocina completa (9 m²): muebles, encimera, electrodomésticos básicos, alicatado y fontanería",9.05,"m²",850,[13,14],""],
+ ["g","Instalaciones"],
+ ["elec","1","Instalación eléctrica renovada de la planta baja (≈110 m²) con boletín",1,"global",5500,[15,16],""],
+ ["g","Envolvente"],
+ ["cub","1","Tejado: levantar, aislar, impermeabilizar y recolocar la teja árabe recuperada (≈75 m²)",75,"m²",110,[17,18],"Por encima de 90 €/m² porque incluye aislamiento y el trabajo de recuperar teja."],
+ ["vent","1","Ventanas nuevas de PVC o aluminio imitación madera en lugar de las de aluminio",6,"ud",550,[8,19],""],
+ ["restv","1","Restauración de carpinterías de pino (balconeras, ventanas y puertas) con vidrio doble",8,"ud",400,[20,21],"Restaurar (≈150 €/ud) más cambiar el vidrio y los herrajes."],
+ ["fach","1","Fachadas principal y lateral: picado, reparación, mortero de cal y pintura (≈155 m²)",155,"m²",55,[22,23],""],
+ ["andamio","1","Andamio para fachadas y tejado",1,"global",1800,[23],"Estimación propia."],
+ ["hum","1","Zócalo de ladrillo visto de 1 m: picar el yeso, rejuntar y acabar con cal transpirable (≈70 m²)",70,"m²",70,[24],""],
+ ["porche","1","Porche y patio: reparar zócalos, desconchados y techo del porche",1,"global",2000,[26],""],
+ ["g","Técnicos y licencias"],
+ ["proy","1","Proyecto y dirección de obra (arquitecto y aparejador)",9,"%PEM",0,[27],"Porcentaje sobre la obra de la fase 1.","0.21"],
+ ["icio","1","ICIO y tasa de licencia de obra mayor (confirmar el tipo en el Ajuntament de Foios)",4,"%PEM",0,[28],"","0"],
+ ["g","Fase 2 · cambra"],
+ ["lam","2","Suelo laminado AC4 con base aislante (≈60 m²)",60,"m²",38,[29],""],
+ ["tab","2","Tabiques y vidrios de distribución junto a las ventanas",1,"global",6000,[],"Estimación propia."],
+ ["elec2","2","Electricidad e iluminación de la cambra",1,"global",2500,[15],""],
+ ["banoc","2","Baño de la cambra: solo preinstalaciones de agua y desagüe",1,"global",2500,[],"Estimación propia."],
+ ["g","Opcionales (no se suman al total)"],
+ ["iny","o","Inyecciones contra la humedad por capilaridad, solo si la medición la confirma (≈30 m²)",30,"m²",100,[25],""],
+ ["terr","o","Impermeabilización de la terraza (≈60 m²)",60,"m²",25,[30],"Sin cambiar el pavimento; con solado nuevo sube bastante."]
 ];
-const KEY="casa-foios-presupuesto-v1";
+const KEY="casa-foios-presupuesto-v2";
 let saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){}
 const tb=document.querySelector("#t tbody");
 const fmt=n=>n.toLocaleString("es-ES",{maximumFractionDigits:0})+" €";
 const val={};
 ROWS.forEach(r=>{
   const tr=document.createElement("tr");
-  if(r[0]==="g"){ tr.className="grp"; tr.innerHTML=`<td colspan="5">${r[2]}</td>`; tb.appendChild(tr); return; }
-  const id=r[0], s=saved[id]||{};
-  val[id]={q:s.q??r[4], p:s.p??r[6], f:r[1], q0:r[4], p0:r[6]};
-  tr.innerHTML=`<td>${r[3]}</td><td class="r"><input type="number" step="any" min="0" data-id="${id}" data-k="q" value="${val[id].q}"></td><td>${r[5]}</td><td class="r"><input type="number" step="any" min="0" data-id="${id}" data-k="p" value="${val[id].p}"></td><td class="r" id="i_${id}"></td>`;
+  if(r[0]==="g"){ tr.className="grp"; tr.innerHTML=`<td colspan="6">${r[1]}</td>`; tb.appendChild(tr); return; }
+  const [id,f,desc,q,u,p,srcs,note,ivaS]=r, s=saved[id]||{};
+  val[id]={q:s.q??q, p:s.p??p, f, u, q0:q, p0:p, iva:ivaS};
+  if(f==="o") tr.className="opt";
+  const pct=u==="%PEM";
+  tr.innerHTML=`<td>${desc}${note?`<small class="n">${note}</small>`:""}</td>
+    <td class="r"><input type="number" step="any" min="0" data-id="${id}" data-k="q" value="${val[id].q}"></td><td>${pct?"% obra":u}</td>
+    <td class="r">${pct?"—":`<input type="number" step="any" min="0" data-id="${id}" data-k="p" value="${val[id].p}">`}</td>
+    <td class="r" id="i_${id}"></td>
+    <td class="src">${srcs.length?srcs.map(n=>`<a href="${SRC[n][1]}" target="_blank" rel="noopener" title="${SRC[n][0]}">${n}</a>`).join(""):"<span style='color:var(--muted)'>propia</span>"}</td>`;
   tb.appendChild(tr);
 });
+document.getElementById("srcs").innerHTML=Object.keys(SRC).map(n=>`<li value="${n}"><a href="${SRC[n][1]}" target="_blank" rel="noopener">${SRC[n][0]}</a></li>`).join("");
 function calc(){
-  let s={1:0,2:0};
-  for(const id in val){ const v=val[id], imp=(+v.q||0)*(+v.p||0); document.getElementById("i_"+id).textContent=fmt(imp); s[v.f]+=imp; }
   const imp=(+document.getElementById("imp").value||0)/100, iva=+document.getElementById("iva").value;
-  const b1=s[1]*(1+imp), b2=(s[1]+s[2])*(1+imp);
-  document.getElementById("s1").textContent=fmt(s[1]);
-  document.getElementById("s2").textContent=fmt(s[2]);
-  document.getElementById("simp").textContent=fmt((s[1]+s[2])*imp);
-  document.getElementById("siva").textContent=fmt(b2*iva);
-  document.getElementById("t1").textContent=fmt(b1*(1+iva));
-  document.getElementById("t2").textContent=fmt(b2*(1+iva));
+  let pem={1:0,2:0,o:0};
+  for(const id in val){ const v=val[id]; if(v.u==="%PEM") continue; const x=(+v.q||0)*(+v.p||0); document.getElementById("i_"+id).textContent=fmt(x); pem[v.f]+=x; }
+  let tec=0, tecIva=0;
+  for(const id in val){ const v=val[id]; if(v.u!=="%PEM") continue; const x=(+v.q||0)/100*pem[1]; document.getElementById("i_"+id).textContent=fmt(x); tec+=x; const r=v.iva===undefined?iva:+v.iva; tecIva+=x*r; }
+  const obra1=pem[1]*(1+imp), iva1=obra1*iva+tecIva, tot1=obra1+tec+iva1;
+  const tot2p=pem[2]*(1+imp)*(1+iva), toto=pem.o*(1+imp)*(1+iva);
+  document.getElementById("pem1").textContent=fmt(pem[1]);
+  document.getElementById("simp").textContent=fmt(pem[1]*imp);
+  document.getElementById("stec").textContent=fmt(tec);
+  document.getElementById("siva1").textContent=fmt(iva1);
+  document.getElementById("t1").textContent=fmt(tot1);
+  document.getElementById("t2p").textContent=fmt(tot2p);
+  document.getElementById("t2").textContent=fmt(tot1+tot2p);
+  document.getElementById("to").textContent=fmt(toto);
 }
 function persist(){ try{ const o={}; for(const id in val) o[id]={q:val[id].q,p:val[id].p}; localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){} }
 tb.addEventListener("input",e=>{ const el=e.target; if(!el.dataset.id) return; val[el.dataset.id][el.dataset.k]=el.value; persist(); calc(); });
